@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>एक्सेल ऑटोमेशन सिस्टम</title>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- SheetJS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <style>
+        /* Inline CSS (based on your original styles with fixes) */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+        }
+
+        h1 i {
+            margin-right: 10px;
+            color: #1d6f42;
+        }
+
+        h2 {
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        h2 i {
+            margin-right: 8px;
+            color: #3498db;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: #f1f1f1;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: #ddd;
+        }
+
+        .tab-btn.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .upload-section {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        select.form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .checkbox-group {
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background 0.3s;
+            margin-top: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .download-btn {
+            background: #2ecc71;
+        }
+
+        .download-btn:hover {
+            background: #27ae60;
+        }
+
+        .results-box, .preview-box, .chart-box {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            border-left: 4px solid #3498db;
+        }
+
+        .preview {
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .preview table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .preview th, .preview td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .preview th {
+            background-color: #f2f2f2;
+        }
+
+        .chart-img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1rem auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .two-column {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .column {
+            flex: 1;
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .success {
+            color: #2ecc71;
+        }
+
+        .error {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .two-column {
+                flex-direction: column;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                width: 100%;
+                margin: 0.25rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-file-excel"></i> एक्सेल ऑटोमेशन सिस्टम</h1>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="clean">डेटा क्लीनिंग</button>
+            <button class="tab-btn" data-tab="reports">रिपोर्ट जनरेशन</button>
+            <button class="tab-btn" data-tab="merge-split">मर्ज/स्प्लिट</button>
+            <button class="tab-btn" data-tab="charts">चार्ट्स</button>
+        </div>
+        
+        <!-- File Upload Section -->
+        <div class="upload-section">
+            <h2>फाइल अपलोड करें</h2>
+            <form id="uploadForm">
+                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" multiple>
+                <button type="submit" class="btn"><i class="fas fa-upload"></i> अपलोड करें</button>
+            </form>
+            <div id="uploadStatus"></div>
+            <div id="fileList" class="checkbox-group"></div>
+        </div>
+        
+        <!-- Data Cleaning Tab -->
+        <div id="clean" class="tab-content active">
+            <h2><i class="fas fa-broom"></i> डेटा क्लीनिंग</h2>
+            <div class="form-group">
+                <label>क्लीनिंग ऑपरेशन्स चुनें:</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="clean_ops" value="remove_duplicates"> डुप्लिकेट रोज़ हटाएं</label>
+                    <label><input type="checkbox" name="clean_ops" value="remove_empty_rows"> खाली रोज़ हटाएं</label>
+                    <label><input type="checkbox" name="clean_ops" value="remove_empty_cols"> खाली कॉलम हटाएं</label>
+                    <label><input type="checkbox" name="clean_ops" value="trim_spaces"> एक्स्ट्रा स्पेस ट्रिम करें</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>फाइल चुनें:</label>
+                <select id="cleanFileSelect" class="form-control"></select>
+            </div>
+            <button id="cleanBtn" class="btn"><i class="fas fa-magic"></i> डेटा क्लीन करें</button>
+            <div id="cleanResults" class="results-box"></div>
+        </div>
+        
+        <!-- Report Generation Tab -->
+        <div id="reports" class="tab-content">
+            <h2><i class="fas fa-file-alt"></i> रिपोर्ट जनरेशन</h2>
+            <div class="form-group">
+                <label>फाइल चुनें:</label>
+                <select id="reportFileSelect" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label>रिपोर्ट टाइप चुनें:</label>
+                <select id="reportType" class="form-control">
+                    <option value="sales">बिक्री रिपोर्ट</option>
+                    <option value="attendance">उपस्थिति रिपोर्ट</option>
+                    <option value="stock">स्टॉक रिपोर्ट</option>
+                </select>
+            </div>
+            <button id="generateReportBtn" class="btn"><i class="fas fa-file-export"></i> रिपोर्ट जनरेट करें</button>
+            <div id="reportPreview" class="preview-box"></div>
+        </div>
+        
+        <!-- Merge/Split Tab -->
+        <div id="merge-split" class="tab-content">
+            <div class="two-column">
+                <!-- Merge Section -->
+                <div class="column">
+                    <h2><i class="fas fa-object-group"></i> फाइल्स मर्ज करें</h2>
+                    <div class="form-group">
+                        <label>मर्ज करने के लिए फाइल्स चुनें:</label>
+                        <div id="mergeFileList" class="checkbox-group"></div>
+                    </div>
+                    <button id="mergeBtn" class="btn"><i class="fas fa-code-branch"></i> फाइल्स मर्ज करें</button>
+                    <div id="mergeResults" class="results-box"></div>
+                </div>
+                
+                <!-- Split Section -->
+                <div class="column">
+                    <h2><i class="fas fa-cut"></i> फाइल स्प्लिट करें</h2>
+                    <div class="form-group">
+                        <label>फाइल चुनें:</label>
+                        <select id="splitFileSelect" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>कॉलम चुनें (इसके आधार पर स्प्लिट होगा):</label>
+                        <select id="splitColumnSelect" class="form-control"></select>
+                    </div>
+                    <button id="splitBtn" class="btn"><i class="fas fa-cut"></i> फाइल स्प्लिट करें</button>
+                    <div id="splitResults" class="results-box"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Tab -->
+        <div id="charts" class="tab-content">
+            <h2><i class="fas fa-chart-bar"></i> चार्ट जनरेशन</h2>
+            <div class="form-group">
+                <label>फाइल चुनें:</label>
+                <select id="chartFileSelect" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label>चार्ट टाइप:</label>
+                <select id="chartType" class="form-control">
+                    <option value="bar">बार चार्ट</option>
+                    <option value="line">लाइन चार्ट</option>
+                    <option value="pie">पाई चार्ट</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>X-अक्ष (कॉलम):</label>
+                <select id="xAxisSelect" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label>Y-अक्ष (कॉलम):</label>
+                <select id="yAxisSelect" class="form-control"></select>
+            </div>
+            <button id="createChartBtn" class="btn"><i class="fas fa-chart-pie"></i> चार्ट बनाएं</button>
+            <div id="chartContainer" class="chart-box">
+                <canvas id="chartCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state to store uploaded files and their data
+        let filesData = {}; // { filename: { workbook, data, headers } }
+        let chartInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tab Functionality
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.getAttribute('data-tab');
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    tabBtns.forEach(btn => btn.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                    btn.classList.add('active');
+                    if (tabId === 'merge-split' || tabId === 'charts' || tabId === 'reports' || tabId === 'clean') {
+                        updateFileSelects();
+                    }
+                });
+            });
+
+            // File Upload
+            const uploadForm = document.getElementById('uploadForm');
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const fileInput = document.getElementById('fileInput');
+                const uploadStatus = document.getElementById('uploadStatus');
+                const fileListDiv = document.getElementById('fileList');
+
+                if (!fileInput.files.length) {
+                    uploadStatus.innerHTML = '<p class="error"><i class="fas fa-times-circle"></i> कृपया कम से कम एक फाइल चुनें</p>';
+                    return;
+                }
+
+                uploadStatus.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> फाइल्स पढ़ी जा रही हैं...</p>';
+                fileListDiv.innerHTML = '';
+
+                try {
+                    for (const file of fileInput.files) {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const data = XLSX.utils.sheet_to_json(worksheet);
+                        const headers = data.length > 0 ? Object.keys(data[0]) : [];
+
+                        filesData[file.name] = { workbook, data, headers };
+                        const label = document.createElement('label');
+                        label.innerHTML = `<input type="checkbox" name="uploaded_files" value="${file.name}" checked> ${file.name}`;
+                        fileListDiv.appendChild(label);
+                    }
+
+                    uploadStatus.innerHTML = `<p class="success"><i class="fas fa-check-circle"></i> ${fileInput.files.length} फाइल्स सफलतापूर्वक पढ़ी गईं</p>`;
+                    updateFileSelects();
+                } catch (error) {
+                    uploadStatus.innerHTML = `<p class="error"><i class="fas fa-times-circle"></i> फाइल पढ़ने में त्रुटि: ${error.message}</p>`;
+                    console.error('Error:', error);
+                }
+            });
+
+            // Data Cleaning
+            document.getElementById('cleanBtn').addEventListener('click', () => {
+                const filename = document.getElementById('cleanFileSelect').value;
+                if (!filename || !filesData[filename]) {
+                    alert('कृपया एक फाइल चुनें');
+                    return;
+                }
+
+                const operations = Array.from(document.querySelectorAll('input[name="clean_ops"]:checked')).map(el => el.value);
+                if (operations.length === 0) {
+                    alert('कृपया कम से कम एक क्लीनिंग ऑपरेशन चुनें');
+                    return;
+                }
+
+                const cleanResults = document.getElementById('cleanResults');
+                cleanResults.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> डेटा क्लीन हो रहा है...</p>';
+
+                let cleanedData = [...filesData[filename].data];
+                let headers = [...filesData[filename].headers];
+                const originalRows = cleanedData.length;
+
+                if (operations.includes('remove_duplicates')) {
+                    cleanedData = [...new Map(cleanedData.map(item => [JSON.stringify(item), item])).values()];
+                }
+                if (operations.includes('remove_empty_rows')) {
+                    cleanedData = cleanedData.filter(row => Object.values(row).some(val => val != null && val !== ''));
+                }
+                if (operations.includes('trim_spaces')) {
+                    cleanedData = cleanedData.map(row => {
+                        const newRow = {};
+                        for (const key in row) {
+                            newRow[key] = typeof row[key] === 'string' ? row[key].trim() : row[key];
+                        }
+                        return newRow;
+                    });
+                }
+                if (operations.includes('remove_empty_cols')) {
+                    const nonEmptyCols = headers.filter(header => cleanedData.some(row => row[header] != null && row[header] !== ''));
+                    cleanedData = cleanedData.map(row => {
+                        const newRow = {};
+                        nonEmptyCols.forEach(col => newRow[col] = row[col]);
+                        return newRow;
+                    });
+                    headers = nonEmptyCols;
+                }
+
+                const cleanedRows = cleanedData.length;
+                filesData[filename].data = cleanedData;
+                filesData[filename].headers = headers;
+
+                const newWorksheet = XLSX.utils.json_to_sheet(cleanedData);
+                const newWorkbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, 'Cleaned');
+                const excelBuffer = XLSX.write(newWorkbook, { bookType: 'xlsx', type: 'array' });
+                const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = URL.createObjectURL(blob);
+
+                cleanResults.innerHTML = `
+                    <div class="success">
+                        <p><i class="fas fa-check-circle"></i> डेटा सफलतापूर्वक क्लीन हो गया!</p>
+                        <p>मूल रोज़: ${originalRows}</p>
+                        <p>क्लीन के बाद रोज़: ${cleanedRows}</p>
+                        <p>हटाई गई रोज़: ${originalRows - cleanedRows}</p>
+                        <a href="${url}" download="cleaned_${filename}" class="btn download-btn"><i class="fas fa-download"></i> क्लीन फाइल डाउनलोड करें</a>
+                    </div>
+                `;
+            });
+
+            // Report Generation
+            document.getElementById('generateReportBtn').addEventListener('click', () => {
+                const filename = document.getElementById('reportFileSelect').value;
+                if (!filename || !filesData[filename]) {
+                    alert('कृपया एक फाइल चुनें');
+                    return;
+                }
+
+                const reportType = document.getElementById('reportType').value;
+                const reportPreview = document.getElementById('reportPreview');
+                reportPreview.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> रिपोर्ट जनरेट हो रही है...</p>';
+
+                const data = filesData[filename].data;
+                const headers = filesData[filename].headers;
+
+                let previewHtml = '<table><thead><tr>';
+                headers.forEach(header => previewHtml += `<th>${header}</th>`);
+                previewHtml += '</tr></thead><tbody>';
+                const limit = reportType === 'sales' ? 5 : reportType === 'attendance' ? 10 : 15;
+                data.slice(0, limit).forEach(row => {
+                    previewHtml += '<tr>';
+                    headers.forEach(header => previewHtml += `<td>${row[header] || ''}</td>`);
+                    previewHtml += '</tr>';
+                });
+                previewHtml += '</tbody></table>';
+
+                const newWorksheet = XLSX.utils.json_to_sheet(data);
+                const newWorkbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, 'Report');
+                const excelBuffer = XLSX.write(newWorkbook, { bookType: 'xlsx', type: 'array' });
+                const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = URL.createObjectURL(blob);
+
+                reportPreview.innerHTML = `
+                    <div class="success">
+                        <p><i class="fas fa-check-circle"></i> ${reportType === 'sales' ? 'बिक्री' : reportType === 'attendance' ? 'उपस्थिति' : 'स्टॉक'} रिपोर्ट सफलतापूर्वक जनरेट हो गई!</p>
+                        <div class="preview">${previewHtml}</div>
+                        <a href="${url}" download="${reportType}_report.xlsx" class="btn download-btn"><i class="fas fa-download"></i> रिपोर्ट डाउनलोड करें</a>
+                    </div>
+                `;
+            });
+
+            // Merge Files
+            document.getElementById('mergeBtn').addEventListener('click', () => {
+                const selectedFiles = Array.from(document.querySelectorAll('input[name="merge_files"]:checked')).map(el => el.value);
+                if (selectedFiles.length < 2) {
+                    alert('कृपया मर्ज करने के लिए कम से कम 2 फाइल्स चुनें');
+                    return;
+                }
+
+                const mergeResults = document.getElementById('mergeResults');
+                mergeResults.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> फाइल्स मर्ज हो रही हैं...</p>';
+
+                // Combine data from selected files
+                let mergedData = [];
+                let allHeaders = new Set();
+                selectedFiles.forEach(filename => {
+                    const { data, headers } = filesData[filename];
+                    mergedData = mergedData.concat(data);
+                    headers.forEach(header => allHeaders.add(header));
+                });
+                allHeaders = Array.from(allHeaders);
+
+                // Normalize data to include all headers
+                mergedData = mergedData.map(row => {
+                    const newRow = {};
+                    allHeaders.forEach(header => newRow[header] = row[header] || '');
+                    return newRow;
+                });
+
+                // Generate preview
+                let previewHtml = '<table><thead><tr>';
+                allHeaders.forEach(header => previewHtml += `<th>${header}</th>`);
+                previewHtml += '</tr></thead><tbody>';
+                mergedData.slice(0, 5).forEach(row => {
+                    previewHtml += '<tr>';
+                    allHeaders.forEach(header => previewHtml += `<td>${row[header] || ''}</td>`);
+                    previewHtml += '</tr>';
+                });
+                previewHtml += '</tbody></table>';
+
+                // Create downloadable file
+                const newWorksheet = XLSX.utils.json_to_sheet(mergedData);
+                const newWorkbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, 'Merged');
+                const excelBuffer = XLSX.write(newWorkbook, { bookType: 'xlsx', type: 'array' });
+                const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = URL.createObjectURL(blob);
+
+                mergeResults.innerHTML = `
+                    <div class="success">
+                        <p><i class="fas fa-check-circle"></i> फाइल्स सफलतापूर्वक मर्ज हो गईं!</p>
+                        <div class="preview">${previewHtml}</div>
+                        <a href="${url}" download="merged_data.xlsx" class="btn download-btn"><i class="fas fa-download"></i> मर्ज्ड फाइल डाउनलोड करें</a>
+                    </div>
+                `;
+            });
+
+            // File Split
+            document.getElementById('splitBtn').addEventListener('click', () => {
+                const filename = document.getElementById('splitFileSelect').value;
+                if (!filename || !filesData[filename]) {
+                    alert('कृपया एक फाइल चुनें');
+                    return;
+                }
+
+                const splitColumn = document.getElementById('splitColumnSelect').value;
+                if (!splitColumn) {
+                    alert('कृपया एक कॉलम चुनें');
+                    return;
+                }
+
+                const splitResults = document.getElementById('splitResults');
+                splitResults.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> फाइल स्प्लिट हो रही है...</p>';
+
+                const data = filesData[filename].data;
+                const groupedData = {};
+                data.forEach(row => {
+                    const key = row[splitColumn] || 'Unknown';
+                    if (!groupedData[key]) groupedData[key] = [];
+                    groupedData[key].push(row);
+                });
+
+                let resultHtml = '';
+                for (const key in groupedData) {
+                    const groupData = groupedData[key];
+                    const newWorksheet = XLSX.utils.json_to_sheet(groupData);
+                    const newWorkbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, 'Split');
+                    const excelBuffer = XLSX.write(newWorkbook, { bookType: 'xlsx', type: 'array' });
+                    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    const url = URL.createObjectURL(blob);
+                    resultHtml += `<p><a href="${url}" download="split_${key}.xlsx" class="btn download-btn"><i class="fas fa-download"></i> डाउनलोड करें: ${key}</a></p>`;
+                }
+
+                splitResults.innerHTML = `
+                    <div class="success">
+                        <p><i class="fas fa-check-circle"></i> फाइल सफलतापूर्वक स्प्लिट हो गई!</p>
+                        ${resultHtml}
+                    </div>
+                `;
+            });
+
+            // Chart Generation
+            document.getElementById('createChartBtn').addEventListener('click', () => {
+                const filename = document.getElementById('chartFileSelect').value;
+                if (!filename || !filesData[filename]) {
+                    alert('कृपया एक फाइल चुनें');
+                    return;
+                }
+
+                const chartType = document.getElementById('chartType').value;
+                const xCol = document.getElementById('xAxisSelect').value;
+                const yCol = document.getElementById('yAxisSelect').value;
+                if (!xCol || !yCol) {
+                    alert('कृपया X और Y अक्ष चुनें');
+                    return;
+                }
+
+                const chartContainer = document.getElementById('chartContainer');
+                chartContainer.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> चार्ट जनरेट हो रहा है...</p>';
+
+                const data = filesData[filename].data;
+                const labels = data.map(row => row[xCol] || '');
+                const values = data.map(row => parseFloat(row[yCol]) || 0);
+
+                if (chartInstance) chartInstance.destroy();
+                const ctx = document.getElementById('chartCanvas').getContext('2d');
+                chartInstance = new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: yCol,
+                            data: values,
+                            backgroundColor: chartType === 'pie' ? labels.map(() => `hsl(${Math.random() * 360}, 70%, 70%)`) : 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: chartType !== 'pie' ? {
+                            y: { beginAtZero: true }
+                        } : {}
+                    }
+                });
+
+                chartContainer.innerHTML = '';
+                chartContainer.appendChild(ctx.canvas);
+                chartContainer.innerHTML += `
+                    <div class="success">
+                        <p><i class="fas fa-check-circle"></i> चार्ट सफलतापूर्वक जनरेट हो गया!</p>
+                    </div>
+                `;
+            });
+
+            // Update File Selects and Column Selects
+            function updateFileSelects() {
+                const selects = [
+                    document.getElementById('cleanFileSelect'),
+                    document.getElementById('reportFileSelect'),
+                    document.getElementById('splitFileSelect'),
+                    document.getElementById('chartFileSelect')
+                ];
+                const mergeFileList = document.getElementById('mergeFileList');
+                const filenames = Object.keys(filesData);
+
+                // Update file selects
+                selects.forEach(select => {
+                    if (!select) return;
+                    select.innerHTML = filenames.length > 0
+                        ? filenames.map(file => `<option value="${file}">${file}</option>`).join('')
+                        : '<option value="">कोई फाइल उपलब्ध नहीं</option>';
+                });
+
+                // Update merge file list
+                if (mergeFileList) {
+                    mergeFileList.innerHTML = filenames.length > 0
+                        ? filenames.map(file => `<label><input type="checkbox" name="merge_files" value="${file}"> ${file}</label>`).join('')
+                        : '<p>कोई फाइल उपलब्ध नहीं</p>';
+                }
+
+                // Update column selects for split and charts
+                const splitFile = document.getElementById('splitFileSelect').value;
+                const chartFile = document.getElementById('chartFileSelect').value;
+                if (splitFile && filesData[splitFile]) {
+                    const splitColumnSelect = document.getElementById('splitColumnSelect');
+                    splitColumnSelect.innerHTML = filesData[splitFile].headers.map(col => `<option value="${col}">${col}</option>`).join('');
+                }
+                if (chartFile && filesData[chartFile]) {
+                    const xAxisSelect = document.getElementById('xAxisSelect');
+                    const yAxisSelect = document.getElementById('yAxisSelect');
+                    const headers = filesData[chartFile].headers;
+                    xAxisSelect.innerHTML = headers.map(col => `<option value="${col}">${col}</option>`).join('');
+                    yAxisSelect.innerHTML = headers.map(col => `<option value="${col}">${col}</option>`).join('');
+                }
+            }
+
+            // Update column selects when file changes
+            document.getElementById('splitFileSelect').addEventListener('change', () => {
+                const filename = document.getElementById('splitFileSelect').value;
+                const splitColumnSelect = document.getElementById('splitColumnSelect');
+                if (filename && filesData[filename]) {
+                    splitColumnSelect.innerHTML = filesData[filename].headers.map(col => `<option value="${col}">${col}</option>`).join('');
+                } else {
+                    splitColumnSelect.innerHTML = '<option value="">कोई कॉलम उपलब्ध नहीं</option>';
+                }
+            });
+
+            document.getElementById('chartFileSelect').addEventListener('change', () => {
+                const filename = document.getElementById('chartFileSelect').value;
+                const xAxisSelect = document.getElementById('xAxisSelect');
+                const yAxisSelect = document.getElementById('yAxisSelect');
+                if (filename && filesData[filename]) {
+                    const headers = filesData[filename].headers;
+                    xAxisSelect.innerHTML = headers.map(col => `<option value="${col}">${col}</option>`).join('');
+                    yAxisSelect.innerHTML = headers.map(col => `<option value="${col}">${col}</option>`).join('');
+                } else {
+                    xAxisSelect.innerHTML = '<option value="">कोई कॉलम उपलब्ध नहीं</option>';
+                    yAxisSelect.innerHTML = '<option value="">कोई कॉलम उपलब्ध नहीं</option>';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
