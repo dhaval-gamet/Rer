@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 सेल फॉर्मेटिंग - Excel Smart Data Entry Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
+  <script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
+  <style>
+      :root {
+      --primary: #1a73e8;
+      --primary-dark: #0d47a1;
+      --secondary: #4caf50;
+      --danger: #f44336;
+      --warning: #ff9800;
+      --light: #f5f5f5;
+      --dark: #333;
+      --success: #4caf50;
+      --border: #ddd;
+      --header-bg: #f8f9fa;
+      --cell-hover: #f0f7ff;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #e0f7fa, #f5f5f5);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 25px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .logo i {
+      font-size: 2.2rem;
+      color: #ffeb3b;
+    }
+    
+    .logo h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stat-item i {
+      font-size: 1.2rem;
+    }
+    
+    .controls {
+      padding: 20px;
+      background: var(--light);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .input-group {
+      display: flex;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    #dataInput {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid var(--primary);
+      border-radius: 8px 0 0 8px;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+      min-width: 200px;
+    }
+    
+    #dataInput:focus {
+      outline: none;
+      border-color: var(--primary-dark);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0 24px;
+      border-radius: 0 8px 8px 0;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    
+    .btn-speech {
+      background: #ff5722;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-speech:hover {
+      background: #e64a19;
+    }
+    
+    .btn-speech:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .btn-upload {
+      background: #673ab7;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-upload:hover {
+      background: #5e35b1;
+    }
+    
+    .file-input {
+      margin-left: 10px;
+    }
+    
+    .chart-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+    
+    .chart-controls input, .chart-controls select {
+      padding: 10px;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    select {
+      padding: 10px;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    
+    .btn {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .btn-warning {
+      background: var(--warning);
+      color: white;
+    }
+    
+    .btn-info {
+      background: #2196f3;
+      color: white;
+    }
+    
+    .content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .sheet-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .sheet-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .sheet-tab {
+      padding: 10px 20px;
+      background: var(--light);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    
+    .sheet-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary-dark);
+    }
+    
+    .sheet-tab:hover:not(.active) {
+      background: #e0e0e0;
+    }
+    
+    .add-sheet {
+      background: none;
+      border: 2px dashed var(--border);
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .table-container {
+      overflow: auto;
+      max-height: 500px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      background: white;
+    }
+    
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 800px;
+      position: relative;
+    }
+    
+    th, td {
+      border: 1px solid var(--border);
+      padding: 12px 15px;
+      text-align: center;
+      min-width: 120px;
+    }
+    
+    thead th {
+      background: var(--header-bg);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    tbody td {
+      transition: background 0.2s;
+      height: 50px;
+      cursor: cell;
+    }
+    
+    tbody td:focus {
+      outline: 3px solid var(--primary);
+      background: var(--cell-hover);
+      z-index: 2;
+      position: relative;
+    }
+    
+    tbody tr:hover td {
+      background: rgba(240, 247, 255, 0.5);
+    }
+    
+    .row-header {
+      background: var(--header-bg);
+      font-weight: 600;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .selected {
+      background: #e3f2fd !important;
+    }
+    
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: var(--light);
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    
+    .cell-status {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .cell-address {
+      background: var(--primary);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 8px;
+      background: var(--success);
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transform: translateX(120%);
+      transition: transform 0.4s ease;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .formula-bar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 15px;
+      background: var(--light);
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    
+    .formula-bar label {
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+    
+    .formula-input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: monospace;
+    }
+    
+    .chart-container {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    #chartCanvas {
+      max-width: 100%;
+      height: 400px;
+    }
+    
+    /* New Features Styles */
+    .feature-highlights {
+      background: linear-gradient(to right, #f8f9fa, #e3f2fd);
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      font-size: 0.9rem;
+    }
+    
+    .feature-item i {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+    
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .btn-sm {
+      padding: 8px 15px;
+      font-size: 0.85rem;
+    }
+    
+    .btn-light {
+      background-color: #f0f4f8;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+    
+    .btn-light:hover {
+      background-color: #e2e8f0;
+    }
+    
+    .cell-format-preview {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: white;
+      padding: 8px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+    
+    .preview-text {
+      min-width: 120px;
+      padding: 5px 10px;
+      border: 1px dashed #ccc;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    .undo-redo-container {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    
+    .search-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      align-items: center;
+    }
+    
+    #searchInput {
+      flex: 1;
+      padding: 10px 15px;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      font-size: 1rem;
+      max-width: 300px;
+    }
+    
+    .highlighted {
+      background-color: yellow;
+      font-weight: bold;
+    }
+    
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .zoom-display {
+      background: var(--primary);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: 500;
+      min-width: 80px;
+      text-align: center;
+    }
+    
+    .context-menu {
+      position: absolute;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 1000;
+      display: none;
+    }
+    
+    .context-menu-item {
+      padding: 10px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+    
+    .context-menu-item:hover {
+      background: #f0f7ff;
+    }
+    
+    .context-menu-divider {
+      height: 1px;
+      background: #eee;
+      margin: 4px 0;
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .logo {
+        justify-content: center;
+      }
+      
+      .stats {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .button-group {
+        justify-content: center;
+      }
+      
+      .sheet-controls {
+        flex-direction: column;
+      }
+      
+      .sheet-tabs {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+      
+      .input-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .btn-primary, .btn-speech, .btn-upload {
+        border-radius: 8px;
+        margin-left: 0;
+        margin-top: 10px;
+      }
+      
+      .table-container {
+        max-height: 400px;
+      }
+      
+      .feature-highlights {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .btn {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+      }
+      
+      #dataInput {
+        border-radius: 8px;
+      }
+      
+      .chart-container {
+        padding: 10px;
+        height: 300px;
+      }
+      
+      .controls, .content {
+        padding: 10px;
+      }
+      
+      .cell-status {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <i class="fas fa-file-excel"></i>
+        <h1>Excel Smart Data Entry Tool</h1>
+      </div>
+      <nav>
+  <a href="index.html" class="btn btn-info" data-tippy-content="होम पेज पर जाएं">होम</a>
+  <a href="data-entry.html" class="btn btn-info" data-tippy-content="डेटा दर्ज करें">डेटा एंट्री</a>
+  <a href="file-upload.html" class="btn btn-info" data-tippy-content="फ़ाइल अपलोड करें">फ़ाइल अपलोड</a>
+  <a href="chart-view.html" class="btn btn-info" data-tippy-content="चार्ट देखें">चार्ट</a>
+  <a href="formatting.html" class="btn btn-info" data-tippy-content="सेल फॉर्मेट करें">फॉर्मेटिंग</a>
+  <a href="pivot-table.html" class="btn btn-info" data-tippy-content="सेल फॉर्मेट करें">pivot tebal</a>
+</nav>
+      <div class="stats">
+        <div class="stat-item">
+          <i class="fas fa-table"></i>
+          <span>शीट: <strong id="sheetCount">1</strong></span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-layer-group"></i>
+          <span>सेल: <strong id="cellCount">50</strong></span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-database"></i>
+          <span>स्टोरेज: <strong>लोकल</strong></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- New Feature Highlights -->
+    <div class="feature-highlights">
+      <div class="feature-item">
+        <i class="fas fa-search"></i>
+        <span>सेल खोज</span>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-undo-alt"></i>
+        <span>पूर्ववत करें / फिर से करें</span>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-text-height"></i>
+        <span>फॉर्मेट प्रीव्यू</span>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-mouse-pointer"></i>
+        <span>राइट-क्लिक मेनू</span>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-search-plus"></i>
+        <span>ज़ूम नियंत्रण</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="toolbar">
+        <button class="btn btn-info" onclick="formatCell('bold')" data-tippy-content="चयनित सेल को बोल्ड करें">
+          <i class="fas fa-bold"></i>
+        </button>
+        <button class="btn btn-info" onclick="formatCell('italic')" data-tippy-content="चयनित सेल को इटैलिक करें">
+          <i class="fas fa-italic"></i>
+        </button>
+        <input type="color" id="colorPicker" onchange="formatCell('color')" data-tippy-content="टेक्स्ट रंग चुनें" aria-label="टेक्स्ट रंग">
+        <button class="btn btn-info" onclick="formatCell('align-left')" data-tippy-content="बायाँ संरेखण">
+          <i class="fas fa-align-left"></i>
+        </button>
+        <button class="btn btn-info" onclick="formatCell('align-center')" data-tippy-content="केंद्र संरेखण">
+          <i class="fas fa-align-center"></i>
+        </button>
+        <button class="btn btn-info" onclick="formatCell('align-right')" data-tippy-content="दायाँ संरेखण">
+          <i class="fas fa-align-right"></i>
+        </button>
+        <button class="btn btn-warning" onclick="clearFormatting()" data-tippy-content="चयनित सेल की फॉर्मेटिंग साफ़ करें">
+          <i class="fas fa-eraser"></i> फॉर्मेटिंग साफ़ करें
+        </button>
+        
+        <!-- New Formatting Buttons -->
+        <button class="btn btn-light" onclick="formatCell('underline')" data-tippy-content="अंडरलाइन">
+          <i class="fas fa-underline"></i>
+        </button>
+        <button class="btn btn-light" onclick="formatCell('strikethrough')" data-tippy-content="स्ट्राइकथ्रू">
+          <i class="fas fa-strikethrough"></i>
+        </button>
+      </div>
+      
+      <!-- Undo/Redo Controls -->
+      <div class="undo-redo-container">
+        <button class="btn btn-sm btn-light" onclick="undoAction()" data-tippy-content="पिछली क्रिया पूर्ववत करें (Ctrl+Z)">
+          <i class="fas fa-undo-alt"></i> पूर्ववत
+        </button>
+        <button class="btn btn-sm btn-light" onclick="redoAction()" data-tippy-content="अगली क्रिया फिर से करें (Ctrl+Y)">
+          <i class="fas fa-redo-alt"></i> फिर से करें
+        </button>
+      </div>
+      
+      <!-- Search Feature -->
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="सेल में खोजें...">
+        <button class="btn btn-info" onclick="searchCells()">
+          <i class="fas fa-search"></i> खोजें
+        </button>
+        <button class="btn btn-light" onclick="clearSearch()">
+          <i class="fas fa-times"></i> साफ़ करें
+        </button>
+      </div>
+      
+      <!-- Format Preview -->
+      <div class="cell-format-preview">
+        <span>वर्तमान फॉर्मेट:</span>
+        <div class="preview-text" id="formatPreview">नमूना पाठ</div>
+      </div>
+      
+      <!-- Zoom Controls -->
+      <div class="zoom-controls">
+        <span>ज़ूम:</span>
+        <button class="btn btn-sm btn-light" onclick="adjustZoom(-10)">
+          <i class="fas fa-search-minus"></i>
+        </button>
+        <div class="zoom-display" id="zoomLevel">100%</div>
+        <button class="btn btn-sm btn-light" onclick="adjustZoom(10)">
+          <i class="fas fa-search-plus"></i>
+        </button>
+        <button class="btn btn-sm btn-info" onclick="resetZoom()">
+          <i class="fas fa-sync-alt"></i> रीसेट
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="sheet-controls">
+        <div class="sheet-tabs">
+          <div class="sheet-tab active" data-sheet="ग्राहक सूची">ग्राहक सूची</div>
+          <div class="sheet-tab" data-sheet="आदेश">आदेश</div>
+          <div class="sheet-tab" data-sheet="इन्वेंटरी">इन्वेंटरी</div>
+          <button class="sheet-tab add-sheet" onclick="addSheet()">
+            <i class="fas fa-plus"></i> नया शीट
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="table" role="grid" aria-label="फॉर्मेटिंग तालिका">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="status-bar">
+        <div class="cell-status">
+          <span>चयनित सेल: <span class="cell-address" id="cellAddress">A1</span></span>
+          <span>मान: <span id="cellValue">-</span></span>
+        </div>
+        <div class="last-saved">
+          <i class="fas fa-save"></i> अंतिम सहेजा गया: <span id="lastSaved">कभी नहीं</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="notification" id="notification">
+      <i class="fas fa-check-circle"></i>
+      <span id="notificationText">सफलतापूर्वक शुरू किया गया!</span>
+    </div>
+    
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+      <div class="context-menu-item" onclick="formatCell('bold')">
+        <i class="fas fa-bold"></i> बोल्ड
+      </div>
+      <div class="context-menu-item" onclick="formatCell('italic')">
+        <i class="fas fa-italic"></i> इटैलिक
+      </div>
+      <div class="context-menu-item" onclick="formatCell('underline')">
+        <i class="fas fa-underline"></i> अंडरलाइन
+      </div>
+      <div class="context-menu-divider"></div>
+      <div class="context-menu-item" onclick="formatCell('align-left')">
+        <i class="fas fa-align-left"></i> बायाँ संरेखण
+      </div>
+      <div class="context-menu-item" onclick="formatCell('align-center')">
+        <i class="fas fa-align-center"></i> केंद्र संरेखण
+      </div>
+      <div class="context-menu-item" onclick="formatCell('align-right')">
+        <i class="fas fa-align-right"></i> दायाँ संरेखण
+      </div>
+      <div class="context-menu-divider"></div>
+      <div class="context-menu-item" onclick="clearFormatting()">
+        <i class="fas fa-eraser"></i> फॉर्मेटिंग साफ़ करें
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // App configuration
+    const config = {
+      totalRows: 10,
+      totalCols: 6,
+      selectedRow: 0,
+      selectedCol: 0,
+      dataTypes: {},
+      lastSaved: null,
+      currentSheet: 'ग्राहक सूची',
+      zoomLevel: 100,
+      actionHistory: [],
+      currentHistoryIndex: -1,
+      searchTerm: '',
+      currentFormat: {
+        bold: false,
+        italic: false,
+        underline: false,
+        strikethrough: false,
+        color: '#000000',
+        textAlign: 'left'
+      }
+    };
+
+    // Sheet management
+    const sheets = {
+      'ग्राहक सूची': { data: [], formulas: {}, dataTypes: {}, formatting: {} },
+      'आदेश': { data: [], formulas: {}, dataTypes: {}, formatting: {} },
+      'इन्वेंटरी': { data: [], formulas: {}, dataTypes: {}, formatting: {} }
+    };
+
+    // DOM Elements
+    const tableHead = document.getElementById("tableHead");
+    const tableBody = document.getElementById("tableBody");
+    const cellAddress = document.getElementById("cellAddress");
+    const cellValue = document.getElementById("cellValue");
+    const lastSaved = document.getElementById("lastSaved");
+    const notification = document.getElementById("notification");
+    const notificationText = document.getElementById("notificationText");
+    const sheetCount = document.getElementById("sheetCount");
+    const cellCount = document.getElementById("cellCount");
+    const colorPicker = document.getElementById("colorPicker");
+    const formatPreview = document.getElementById("formatPreview");
+    const zoomLevel = document.getElementById("zoomLevel");
+    const searchInput = document.getElementById("searchInput");
+    const contextMenu = document.getElementById("contextMenu");
+
+    // Initialize the application
+    function initApp() {
+      if (!tableHead || !tableBody || !colorPicker) {
+        logError('आवश्यक DOM तत्व नहीं मिले');
+        return;
+      }
+
+      // Initialize tooltips
+      if (typeof tippy !== 'undefined') {
+        tippy('[data-tippy-content]');
+      } else {
+        console.warn('Tippy.js लोड नहीं हुआ, टूलटिप्स अक्षम।');
+      }
+
+      createTable(config.totalRows, config.totalCols);
+      loadFromLocalStorage();
+      updateCellCount();
+      updateFormatPreview();
+      updateZoomDisplay();
+
+      if (config.lastSaved) {
+        lastSaved.textContent = new Date(config.lastSaved).toLocaleString();
+      }
+
+      // Touch support for mobile
+      tableBody.addEventListener('touchstart', (e) => {
+        const td = e.target.closest('td');
+        if (td) {
+          const row = td.parentElement.rowIndex - 1;
+          const col = td.cellIndex - 1;
+          selectCell(row, col);
+        }
+      });
+      
+      // Context menu support
+      tableBody.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const td = e.target.closest('td');
+        if (td) {
+          const row = td.parentElement.rowIndex - 1;
+          const col = td.cellIndex - 1;
+          selectCell(row, col);
+          
+          // Position context menu
+          contextMenu.style.display = 'block';
+          contextMenu.style.left = `${e.pageX}px`;
+          contextMenu.style.top = `${e.pageY}px`;
+        }
+      });
+      
+      // Close context menu when clicking elsewhere
+      document.addEventListener('click', () => {
+        contextMenu.style.display = 'none';
+      });
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        // Ctrl+Z for undo
+        if (e.ctrlKey && e.key === 'z') {
+          undoAction();
+          e.preventDefault();
+        }
+        // Ctrl+Y for redo
+        if (e.ctrlKey && e.key === 'y') {
+          redoAction();
+          e.preventDefault();
+        }
+      });
+      
+      // Search input handling
+      searchInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+          searchCells();
+        }
+      });
+
+      selectCell(0, 0);
+      showNotification('फॉर्मेटिंग पेज सफलतापूर्वक शुरू किया गया!');
+    }
+
+    // Create the table structure
+    function createTable(rows, cols) {
+      const trRow = document.createElement("tr");
+      trRow.appendChild(document.createElement("th"));
+
+      for (let i = 0; i < cols; i++) {
+        const th = document.createElement("th");
+        th.textContent = String.fromCharCode(65 + i);
+        trRow.appendChild(th);
+      }
+
+      tableHead.innerHTML = "";
+      tableHead.appendChild(trRow);
+
+      tableBody.innerHTML = "";
+
+      for (let i = 0; i < rows; i++) {
+        const tr = document.createElement("tr");
+        const thTr = document.createElement("th");
+        thTr.textContent = (i + 1).toString();
+        thTr.className = "row-header";
+        tr.appendChild(thTr);
+
+        for (let k = 0; k < cols; k++) {
+          const td = document.createElement("td");
+          td.addEventListener("click", () => selectCell(i, k));
+          tr.appendChild(td);
+        }
+
+        tableBody.appendChild(tr);
+      }
+
+      // Apply saved formatting
+      applyFormatting();
+    }
+
+    // Select a cell
+    function selectCell(row, col) {
+      if (row >= config.totalRows || row < 0 || col >= config.totalCols || col < 0) return;
+      config.selectedRow = row;
+      config.selectedCol = col;
+
+      clearSelection();
+
+      const td = tableBody.rows[config.selectedRow]?.cells[config.selectedCol + 1];
+      if (td) {
+        td.classList.add("selected");
+        td.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      updateStatusBar();
+      updateFormatPreview();
+    }
+
+    // Clear selection from all cells
+    function clearSelection() {
+      const cells = tableBody.querySelectorAll("td");
+      cells.forEach(cell => cell.classList.remove("selected"));
+    }
+
+    // Update status bar information
+    function updateStatusBar() {
+      const colName = String.fromCharCode(65 + config.selectedCol);
+      cellAddress.textContent = `${colName}${config.selectedRow + 1}`;
+
+      const cell = tableBody.rows[config.selectedRow]?.cells[config.selectedCol + 1];
+      cellValue.textContent = cell?.textContent || "-";
+    }
+    
+    // Update format preview
+    function updateFormatPreview() {
+      const cellId = `${String.fromCharCode(65 + config.selectedCol)}${config.selectedRow + 1}`;
+      const format = sheets[config.currentSheet].formatting?.[cellId] || {};
+      
+      // Update preview element
+      formatPreview.style.fontWeight = format.bold ? 'bold' : 'normal';
+      formatPreview.style.fontStyle = format.italic ? 'italic' : 'normal';
+      formatPreview.style.textDecoration = format.underline ? 'underline' : 'none';
+      formatPreview.style.textDecoration = format.strikethrough ? 'line-through' : formatPreview.style.textDecoration;
+      formatPreview.style.color = format.color || '#000000';
+      formatPreview.style.textAlign = format.textAlign || 'left';
+      
+      // Update current format state
+      config.currentFormat = {
+        bold: format.bold || false,
+        italic: format.italic || false,
+        underline: format.underline || false,
+        strikethrough: format.strikethrough || false,
+        color: format.color || '#000000',
+        textAlign: format.textAlign || 'left'
+      };
+    }
+
+    // Format selected cell
+    function formatCell(style) {
+      const cellId = `${String.fromCharCode(65 + config.selectedCol)}${config.selectedRow + 1}`;
+      const cell = tableBody.rows[config.selectedRow].cells[config.selectedCol + 1];
+      sheets[config.currentSheet].formatting = sheets[config.currentSheet].formatting || {};
+      
+      // Save current state for undo
+      saveCurrentStateForUndo();
+
+      // Initialize formatting object for the cell if it doesn't exist
+      sheets[config.currentSheet].formatting[cellId] = sheets[config.currentSheet].formatting[cellId] || {};
+
+      switch (style) {
+        case 'bold':
+          sheets[config.currentSheet].formatting[cellId].bold = !sheets[config.currentSheet].formatting[cellId].bold;
+          cell.style.fontWeight = sheets[config.currentSheet].formatting[cellId].bold ? 'bold' : 'normal';
+          showNotification(`सेल ${sheets[config.currentSheet].formatting[cellId].bold ? 'बोल्ड' : 'नॉर्मल'} फॉर्मेटिंग लागू की गई!`);
+          break;
+        case 'italic':
+          sheets[config.currentSheet].formatting[cellId].italic = !sheets[config.currentSheet].formatting[cellId].italic;
+          cell.style.fontStyle = sheets[config.currentSheet].formatting[cellId].italic ? 'italic' : 'normal';
+          showNotification(`सेल ${sheets[config.currentSheet].formatting[cellId].italic ? 'इटैलिक' : 'नॉर्मल'} फॉर्मेटिंग लागू की गई!`);
+          break;
+        case 'underline':
+          sheets[config.currentSheet].formatting[cellId].underline = !sheets[config.currentSheet].formatting[cellId].underline;
+          cell.style.textDecoration = sheets[config.currentSheet].formatting[cellId].underline ? 'underline' : 'none';
+          showNotification(`सेल ${sheets[config.currentSheet].formatting[cellId].underline ? 'अंडरलाइन' : 'सामान्य'} फॉर्मेटिंग लागू की गई!`);
+          break;
+        case 'strikethrough':
+          sheets[config.currentSheet].formatting[cellId].strikethrough = !sheets[config.currentSheet].formatting[cellId].strikethrough;
+          cell.style.textDecoration = sheets[config.currentSheet].formatting[cellId].strikethrough ? 'line-through' : 'none';
+          showNotification(`सेल ${sheets[config.currentSheet].formatting[cellId].strikethrough ? 'स्ट्राइकथ्रू' : 'सामान्य'} फॉर्मेटिंग लागू की गई!`);
+          break;
+        case 'color':
+          sheets[config.currentSheet].formatting[cellId].color = colorPicker.value;
+          cell.style.color = sheets[config.currentSheet].formatting[cellId].color;
+          showNotification('सेल रंग फॉर्मेटिंग लागू की गई!');
+          break;
+        case 'align-left':
+          sheets[config.currentSheet].formatting[cellId].textAlign = 'left';
+          cell.style.textAlign = 'left';
+          showNotification('बायाँ संरेखण लागू किया गया!');
+          break;
+        case 'align-center':
+          sheets[config.currentSheet].formatting[cellId].textAlign = 'center';
+          cell.style.textAlign = 'center';
+          showNotification('केंद्र संरेखण लागू किया गया!');
+          break;
+        case 'align-right':
+          sheets[config.currentSheet].formatting[cellId].textAlign = 'right';
+          cell.style.textAlign = 'right';
+          showNotification('दायाँ संरेखण लागू किया गया!');
+          break;
+      }
+
+      saveToLocalStorage();
+      updateFormatPreview();
+    }
+
+    // Clear formatting for selected cell
+    function clearFormatting() {
+      const cellId = `${String.fromCharCode(65 + config.selectedCol)}${config.selectedRow + 1}`;
+      const cell = tableBody.rows[config.selectedRow].cells[config.selectedCol + 1];
+      
+      // Save current state for undo
+      saveCurrentStateForUndo();
+
+      // Remove formatting for the cell
+      if (sheets[config.currentSheet].formatting && sheets[config.currentSheet].formatting[cellId]) {
+        delete sheets[config.currentSheet].formatting[cellId];
+        cell.style.fontWeight = 'normal';
+        cell.style.fontStyle = 'normal';
+        cell.style.textDecoration = 'none';
+        cell.style.color = '';
+        cell.style.textAlign = '';
+        saveToLocalStorage();
+        showNotification('सेल फॉर्मेटिंग साफ़ कर दी गई!');
+      } else {
+        showNotification('कोई फॉर्मेटिंग मौजूद नहीं थी!');
+      }
+      
+      updateFormatPreview();
+    }
+
+    // Apply formatting to all cells
+    function applyFormatting() {
+      for (let i = 0; i < config.totalRows; i++) {
+        for (let j = 0; j < config.totalCols; j++) {
+          const cellId = `${String.fromCharCode(65 + j)}${i + 1}`;
+          const cell = tableBody.rows[i].cells[j + 1];
+          const format = sheets[config.currentSheet].formatting?.[cellId] || {};
+
+          cell.style.fontWeight = format.bold ? 'bold' : 'normal';
+          cell.style.fontStyle = format.italic ? 'italic' : 'normal';
+          cell.style.textDecoration = format.underline ? 'underline' : (format.strikethrough ? 'line-through' : 'none');
+          cell.style.color = format.color || '';
+          cell.style.textAlign = format.textAlign || '';
+        }
+      }
+    }
+
+    // Add new sheet
+    function addSheet() {
+      const sheetName = `शीट${Object.keys(sheets).length + 1}`;
+      sheets[sheetName] = { data: [], formulas: {}, dataTypes: {}, formatting: {} };
+      const tab = document.createElement('div');
+      tab.className = 'sheet-tab';
+      tab.dataset.sheet = sheetName;
+      tab.textContent = sheetName;
+      tab.addEventListener('click', () => {
+        document.querySelector('.sheet-tab.active').classList.remove('active');
+        tab.classList.add('active');
+        config.currentSheet = sheetName;
+        loadSheet();
+      });
+      document.querySelector('.sheet-tabs').insertBefore(tab, document.querySelector('.add-sheet'));
+      config.currentSheet = sheetName;
+      tab.classList.add('active');
+      document.querySelector('.sheet-tab.active').classList.remove('active');
+      loadSheet();
+      sheetCount.textContent = Object.keys(sheets).length;
+    }
+
+    // Load sheet data
+    function loadSheet() {
+      const sheetData = sheets[config.currentSheet];
+      config.dataTypes = sheetData.dataTypes || {};
+      config.totalRows = sheetData.data?.length || 10;
+      config.totalCols = sheetData.data?.[0]?.length || 6;
+
+      createTable(config.totalRows, config.totalCols);
+
+      for (let i = 0; i < config.totalRows; i++) {
+        for (let j = 0; j < config.totalCols; j++) {
+          const cell = tableBody.rows[i].cells[j + 1];
+          cell.textContent = sheetData.data?.[i]?.[j] || '';
+        }
+      }
+
+      selectCell(0, 0);
+      updateCellCount();
+      sheetCount.textContent = Object.keys(sheets).length;
+    }
+
+    // Update cell count
+    function updateCellCount() {
+      if (cellCount) {
+        cellCount.textContent = (config.totalRows * config.totalCols).toString();
+      }
+    }
+
+    // Show notification
+    function showNotification(message) {
+      if (!notification || !notificationText) return;
+
+      notificationText.textContent = message;
+      notification.classList.add('show');
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    // Log errors
+    function logError(message, error) {
+      console.error(`[ExcelTool] ${message}`, error);
+      showNotification(`त्रुटि: ${message}`);
+    }
+
+    // Save data to localStorage
+    function saveToLocalStorage() {
+      localStorage.setItem("excelData", JSON.stringify(sheets));
+
+      config.lastSaved = Date.now();
+      if (lastSaved) {
+        lastSaved.textContent = new Date(config.lastSaved).toLocaleString();
+      }
+
+      showNotification("फॉर्मेटिंग सफलतापूर्वक सहेजी गई!");
+    }
+
+    // Load data from localStorage
+    function loadFromLocalStorage() {
+      const savedData = localStorage.getItem("excelData");
+      if (!savedData) return;
+
+      const data = JSON.parse(savedData);
+      Object.assign(sheets, data);
+
+      loadSheet();
+
+      config.lastSaved = Date.now();
+      if (lastSaved) {
+        lastSaved.textContent = new Date().toLocaleString();
+      }
+
+      showNotification("डेटा और फॉर्मेटिंग सफलतापूर्वक लोड किए गए!");
+    }
+    
+    // New Features Implementation
+    
+    // Undo/Redo functionality
+    function saveCurrentStateForUndo() {
+      // Only save state if it's different from the last one
+      const currentState = JSON.stringify(sheets[config.currentSheet].formatting);
+      
+      if (config.actionHistory.length === 0 || 
+          currentState !== JSON.stringify(config.actionHistory[config.currentHistoryIndex])) {
+        
+        // Remove any states after the current index (if we've undone some actions)
+        if (config.currentHistoryIndex < config.actionHistory.length - 1) {
+          config.actionHistory = config.actionHistory.slice(0, config.currentHistoryIndex + 1);
+        }
+        
+        // Save current state
+        config.actionHistory.push(JSON.parse(JSON.stringify(sheets[config.currentSheet].formatting)));
+        config.currentHistoryIndex = config.actionHistory.length - 1;
+        
+        // Limit history to 50 actions
+        if (config.actionHistory.length > 50) {
+          config.actionHistory.shift();
+          config.currentHistoryIndex--;
+        }
+      }
+    }
+    
+    function undoAction() {
+      if (config.currentHistoryIndex > 0) {
+        config.currentHistoryIndex--;
+        sheets[config.currentSheet].formatting = JSON.parse(JSON.stringify(config.actionHistory[config.currentHistoryIndex]));
+        applyFormatting();
+        showNotification('पिछली क्रिया पूर्ववत की गई');
+        saveToLocalStorage();
+        updateFormatPreview();
+      } else {
+        showNotification('पूर्ववत करने के लिए कोई क्रिया नहीं');
+      }
+    }
+    
+    function redoAction() {
+      if (config.currentHistoryIndex < config.actionHistory.length - 1) {
+        config.currentHistoryIndex++;
+        sheets[config.currentSheet].formatting = JSON.parse(JSON.stringify(config.actionHistory[config.currentHistoryIndex]));
+        applyFormatting();
+        showNotification('क्रिया फिर से की गई');
+        saveToLocalStorage();
+        updateFormatPreview();
+      } else {
+        showNotification('फिर से करने के लिए कोई क्रिया नहीं');
+      }
+    }
+    
+    // Search functionality
+    function searchCells() {
+      clearSearch();
+      
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      if (!searchTerm) return;
+      
+      config.searchTerm = searchTerm;
+      let found = false;
+      
+      for (let i = 0; i < config.totalRows; i++) {
+        for (let j = 0; j < config.totalCols; j++) {
+          const cell = tableBody.rows[i].cells[j + 1];
+          const cellText = cell.textContent.toLowerCase();
+          
+          if (cellText.includes(searchTerm)) {
+            cell.classList.add('highlighted');
+            found = true;
+          }
+        }
+      }
+      
+      if (found) {
+        showNotification(`"${searchTerm}" के लिए ${document.querySelectorAll('.highlighted').length} परिणाम मिले`);
+      } else {
+        showNotification(`"${searchTerm}" के लिए कोई परिणाम नहीं मिला`);
+      }
+    }
+    
+    function clearSearch() {
+      const highlighted = document.querySelectorAll('.highlighted');
+      highlighted.forEach(cell => cell.classList.remove('highlighted'));
+      config.searchTerm = '';
+      searchInput.value = '';
+    }
+    
+    // Zoom functionality
+    function adjustZoom(amount) {
+      config.zoomLevel += amount;
+      
+      // Limit zoom between 50% and 200%
+      if (config.zoomLevel < 50) config.zoomLevel = 50;
+      if (config.zoomLevel > 200) config.zoomLevel = 200;
+      
+      // Apply zoom
+      document.body.style.zoom = `${config.zoomLevel}%`;
+      updateZoomDisplay();
+    }
+    
+    function resetZoom() {
+      config.zoomLevel = 100;
+      document.body.style.zoom = '100%';
+      updateZoomDisplay();
+    }
+    
+    function updateZoomDisplay() {
+      zoomLevel.textContent = `${config.zoomLevel}%`;
+    }
+
+    // Initialize the app when DOM is ready
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>

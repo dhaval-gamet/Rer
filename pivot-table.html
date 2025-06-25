@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 पिवट टेबल - Excel Smart Data Entry Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
+  <script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <style>
+      :root {
+      --primary: #1a73e8;
+      --primary-dark: #0d47a1;
+      --secondary: #4caf50;
+      --danger: #f44336;
+      --warning: #ff9800;
+      --light: #f5f5f5;
+      --dark: #333;
+      --success: #4caf50;
+      --border: #ddd;
+      --header-bg: #f8f9fa;
+      --cell-hover: #f0f7ff;
+      --pivot-row: #e3f2fd;
+      --pivot-col: #e8f5e9;
+      --pivot-total: #ffecb3;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #e0f7fa, #f5f5f5);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 25px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .logo i {
+      font-size: 2.2rem;
+      color: #ffeb3b;
+    }
+    
+    .logo h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stat-item i {
+      font-size: 1.2rem;
+    }
+    
+    .controls {
+      padding: 20px;
+      background: var(--light);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .pivot-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .control-group label {
+      font-weight: 600;
+      color: var(--primary-dark);
+      font-size: 0.9rem;
+    }
+    
+    .pivot-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 15px;
+    }
+    
+    select {
+      padding: 12px 15px;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: white;
+      width: 100%;
+      transition: all 0.3s;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: var(--primary-dark);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+    }
+    
+    .btn {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-info {
+      background: #2196f3;
+      color: white;
+    }
+    
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .btn-warning {
+      background: var(--warning);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: #9e9e9e;
+      color: white;
+    }
+    
+    .btn-dark {
+      background: #333;
+      color: white;
+    }
+    
+    .content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+    
+    .sheet-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .sheet-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .sheet-tab {
+      padding: 10px 20px;
+      background: var(--light);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    
+    .sheet-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary-dark);
+    }
+    
+    .sheet-tab:hover:not(.active) {
+      background: #e0e0e0;
+    }
+    
+    .add-sheet {
+      background: none;
+      border: 2px dashed var(--border);
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .table-container {
+      overflow: auto;
+      max-height: 500px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      background: white;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    
+    .table-container h3 {
+      position: sticky;
+      top: 0;
+      background: var(--light);
+      padding: 15px 20px;
+      margin: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .table-container h3 i {
+      color: var(--primary);
+    }
+    
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 800px;
+      position: relative;
+    }
+    
+    th, td {
+      border: 1px solid var(--border);
+      padding: 12px 15px;
+      text-align: center;
+      min-width: 120px;
+    }
+    
+    thead th {
+      background: var(--header-bg);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    tbody td {
+      transition: background 0.2s;
+      height: 50px;
+      cursor: cell;
+    }
+    
+    tbody td:focus {
+      outline: 3px solid var(--primary);
+      background: var(--cell-hover);
+      z-index: 2;
+      position: relative;
+    }
+    
+    tbody tr:hover td {
+      background: rgba(240, 247, 255, 0.5);
+    }
+    
+    .row-header {
+      background: var(--header-bg);
+      font-weight: 600;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .selected {
+      background: #e3f2fd !important;
+    }
+    
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: var(--light);
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    
+    .cell-status {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .cell-address {
+      background: var(--primary);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 8px;
+      background: var(--success);
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transform: translateX(120%);
+      transition: transform 0.4s ease;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    /* Pivot Table Styles */
+    .pivot-table th {
+      background: var(--pivot-row);
+    }
+    
+    .pivot-table th.pivot-col-header {
+      background: var(--pivot-col);
+    }
+    
+    .pivot-table .pivot-row-header {
+      background: var(--pivot-row);
+      font-weight: 600;
+    }
+    
+    .pivot-table .pivot-total-row {
+      background: var(--pivot-total);
+      font-weight: bold;
+    }
+    
+    .pivot-table .pivot-total-col {
+      background: var(--pivot-total);
+      font-weight: bold;
+    }
+    
+    .pivot-table .pivot-grand-total {
+      background: #ffcc80;
+      font-weight: bold;
+    }
+    
+    /* New Features */
+    .feature-highlights {
+      background: linear-gradient(to right, #f8f9fa, #e3f2fd);
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      font-size: 0.9rem;
+    }
+    
+    .feature-item i {
+      color: var(--primary);
+      font-size: 1.2rem;
+    }
+    
+    .progress-container {
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 10px;
+      display: none;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    
+    .sort-indicator {
+      margin-left: 5px;
+      font-size: 0.8rem;
+    }
+    
+    .storage-info {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #4caf50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .storage-info i {
+      color: #4caf50;
+      font-size: 1.5rem;
+    }
+    
+    .storage-details {
+      flex: 1;
+    }
+    
+    .storage-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .storage-data {
+      font-size: 0.9rem;
+      color: #555;
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .logo {
+        justify-content: center;
+      }
+      
+      .stats {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .pivot-controls {
+        grid-template-columns: 1fr;
+      }
+      
+      .sheet-controls {
+        flex-direction: column;
+      }
+      
+      .sheet-tabs {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+      
+      .table-container {
+        max-height: 400px;
+      }
+      
+      .feature-highlights {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .btn {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+      }
+      
+      .chart-container {
+        padding: 10px;
+        height: 300px;
+      }
+      
+      .controls, .content {
+        padding: 10px;
+      }
+      
+      .cell-status {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <i class="fas fa-file-excel"></i>
+        <h1>Excel Smart Data Entry Tool</h1>
+      </div>
+      <nav>
+        <a href="index.html" class="btn btn-info" data-tippy-content="होम पेज पर जाएं">होम</a>
+        <a href="data-entry.html" class="btn btn-info" data-tippy-content="डेटा दर्ज करें">डेटा एंट्री</a>
+        <a href="file-upload.html" class="btn btn-info" data-tippy-content="फ़ाइल अपलोड करें">फ़ाइल अपलोड</a>
+        <a href="chart-view.html" class="btn btn-info" data-tippy-content="चार्ट देखें">चार्ट</a>
+        <a href="formatting.html" class="btn btn-info" data-tippy-content="सेल फॉर्मेट करें">फॉर्मेटिंग</a>
+        <a href="pivot-table.html" class="btn btn-info" data-tippy-content="सेल फॉर्मेट करें">pivot tebal</a>
+      </nav>
+      <div class="stats">
+        <div class="stat-item">
+          <i class="fas fa-table"></i>
+          <span>शीट: <strong id="sheetCount">1</strong></span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-layer-group"></i>
+          <span>सेल: <strong id="cellCount">50</strong></span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-database"></i>
+          <span>स्टोरेज: <strong>लोकल</strong></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- New Feature Highlights -->
+    <div class="feature-highlights">
+      <div class="feature-item">
+        <i class="fas fa-database"></i>
+        <span>लोकल स्टोरेज डेटा</span>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-sort"></i>
+        <span>पिवट टेबल सॉर्टिंग</span>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-calculator"></i>
+        <span>कुल योग और उपयोग</span>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-filter"></i>
+        <span>डेटा फ़िल्टरिंग</span>
+      </div>
+      <div class="feature-item">
+        <i class="fas fa-chart-bar"></i>
+        <span>पिवट चार्ट</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="pivot-controls">
+        <div class="control-group">
+          <label for="rowField"><i class="fas fa-bars"></i> पंक्ति कॉलम</label>
+          <select id="rowField" data-tippy-content="पंक्ति के लिए कॉलम चुनें" aria-label="पंक्ति कॉलम">
+            <option value="">पंक्ति कॉलम चुनें</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label for="colField"><i class="fas fa-columns"></i> स्तंभ कॉलम</label>
+          <select id="colField" data-tippy-content="स्तंभ के लिए कॉलम चुनें" aria-label="स्तंभ कॉलम">
+            <option value="">स्तंभ कॉलम चुनें</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label for="valueField"><i class="fas fa-calculator"></i> मान कॉलम</label>
+          <select id="valueField" data-tippy-content="मान के लिए कॉलम चुनें" aria-label="मान कॉलम">
+            <option value="">मान कॉलम चुनें</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label for="aggregation"><i class="fas fa-chart-pie"></i> एकत्रीकरण</label>
+          <select id="aggregation" data-tippy-content="एकत्रीकरण प्रकार चुनें" aria-label="एकत्रीकरण प्रकार">
+            <option value="sum">सम (Sum)</option>
+            <option value="average">औसत (Average)</option>
+            <option value="count">गणना (Count)</option>
+            <option value="max">अधिकतम (Max)</option>
+            <option value="min">न्यूनतम (Min)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      
+      <div class="pivot-actions">
+        <button class="btn btn-info" onclick="generatePivotTable()" data-tippy-content="पिवट टेबल बनाएं">
+          <i class="fas fa-table"></i> पिवट टेबल बनाएं
+        </button>
+        <button class="btn btn-success" onclick="exportPivotTable()" data-tippy-content="पिवट टेबल को CSV में निर्यात करें">
+          <i class="fas fa-download"></i> CSV निर्यात
+        </button>
+        <button class="btn btn-secondary" onclick="clearPivotTable()" data-tippy-content="पिवट टेबल साफ़ करें">
+          <i class="fas fa-trash-alt"></i> साफ़ करें
+        </button>
+        <button class="btn btn-warning" onclick="refreshData()" data-tippy-content="डेटा ताज़ा करें">
+          <i class="fas fa-sync-alt"></i> ताज़ा करें
+        </button>
+        <button class="btn btn-dark" onclick="saveToLocalStorage()" data-tippy-content="डेटा सहेजें">
+          <i class="fas fa-save"></i> सहेजें
+        </button>
+      </div>
+      
+      <div class="storage-info">
+        <i class="fas fa-database"></i>
+        <div class="storage-details">
+          <div class="storage-title">लोकल स्टोरेज डेटा</div>
+          <div class="storage-data" id="storageInfo">डेटा लोड हो रहा है...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="sheet-controls">
+        <div class="sheet-tabs">
+          <div class="sheet-tab active" data-sheet="ग्राहक सूची">ग्राहक सूची</div>
+          <div class="sheet-tab" data-sheet="आदेश">आदेश</div>
+          <div class="sheet-tab" data-sheet="इन्वेंटरी">इन्वेंटरी</div>
+          <button class="sheet-tab add-sheet" onclick="addSheet()">
+            <i class="fas fa-plus"></i> नया शीट
+          </button>
+        </div>
+        <div>
+          <button class="btn btn-info" onclick="showSampleData()">
+            <i class="fas fa-database"></i> नमूना डेटा लोड करें
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <h3><i class="fas fa-eye"></i> डेटा प्रीव्यू (लोकल स्टोरेज से)</h3>
+        <table id="dataTable" role="grid" aria-label="डेटा प्रीव्यू तालिका">
+          <thead id="dataTableHead"></thead>
+          <tbody id="dataTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="table-container">
+        <h3><i class="fas fa-pivot-table"></i> पिवट टेबल</h3>
+        <table id="pivotTable" class="pivot-table" role="grid" aria-label="पिवट टेबल">
+          <thead id="pivotTableHead"></thead>
+          <tbody id="pivotTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="status-bar">
+        <div class="cell-status">
+          <span>चयनित सेल: <span class="cell-address" id="cellAddress">A1</span></span>
+          <span>मान: <span id="cellValue">-</span></span>
+        </div>
+        <div class="last-saved">
+          <i class="fas fa-save"></i> अंतिम सहेजा गया: <span id="lastSaved">कभी नहीं</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="notification" id="notification">
+      <i class="fas fa-check-circle"></i>
+      <span id="notificationText">सफलतापूर्वक शुरू किया गया!</span>
+    </div>
+  </div>
+
+  <script>
+    // App configuration
+    const config = {
+      totalRows: 10,
+      totalCols: 6,
+      selectedRow: 0,
+      selectedCol: 0,
+      dataTypes: {},
+      lastSaved: null,
+      currentSheet: 'ग्राहक सूची',
+      pivotData: null,
+      sortConfig: { column: null, direction: 'asc' }
+    };
+
+    // Sheet management
+    const sheets = {
+      'ग्राहक सूची': { data: [], formulas: {}, dataTypes: {}, formatting: {} },
+      'आदेश': { data: [], formulas: {}, dataTypes: {}, formatting: {} },
+      'इन्वेंटरी': { data: [], formulas: {}, dataTypes: {}, formatting: {} }
+    };
+
+    // DOM Elements
+    const dataTableHead = document.getElementById("dataTableHead");
+    const dataTableBody = document.getElementById("dataTableBody");
+    const pivotTableHead = document.getElementById("pivotTableHead");
+    const pivotTableBody = document.getElementById("pivotTableBody");
+    const cellAddress = document.getElementById("cellAddress");
+    const cellValue = document.getElementById("cellValue");
+    const lastSaved = document.getElementById("lastSaved");
+    const notification = document.getElementById("notification");
+    const notificationText = document.getElementById("notificationText");
+    const sheetCount = document.getElementById("sheetCount");
+    const cellCount = document.getElementById("cellCount");
+    const rowField = document.getElementById("rowField");
+    const colField = document.getElementById("colField");
+    const valueField = document.getElementById("valueField");
+    const aggregation = document.getElementById("aggregation");
+    const progressContainer = document.getElementById("progressContainer");
+    const progressBar = document.getElementById("progressBar");
+    const storageInfo = document.getElementById("storageInfo");
+
+    // Initialize the application
+    function initApp() {
+      // Initialize tooltips
+      if (typeof tippy !== 'undefined') {
+        tippy('[data-tippy-content]');
+      }
+      
+      // Load data from localStorage
+      loadFromLocalStorage();
+      
+      // Set up sheet switching
+      document.querySelectorAll('.sheet-tab:not(.add-sheet)').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelector('.sheet-tab.active').classList.remove('active');
+          tab.classList.add('active');
+          config.currentSheet = tab.dataset.sheet;
+          loadSheet();
+        });
+      });
+
+      showNotification('पिवट टेबल पेज सफलतापूर्वक शुरू किया गया!');
+    }
+
+    // Save data to localStorage
+    function saveToLocalStorage() {
+      localStorage.setItem("excelData", JSON.stringify(sheets));
+      config.lastSaved = Date.now();
+      if (lastSaved) {
+        lastSaved.textContent = new Date(config.lastSaved).toLocaleString();
+      }
+      updateStorageInfo();
+      showNotification('डेटा लोकल स्टोरेज में सहेजा गया!');
+    }
+
+    // Load data from localStorage
+    function loadFromLocalStorage() {
+      const savedData = localStorage.getItem("excelData");
+      if (savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          Object.assign(sheets, data);
+          showNotification('डेटा लोकल स्टोरेज से लोड किया गया!');
+        } catch (e) {
+          console.error("Error parsing saved data", e);
+          showNotification('लोकल स्टोरेज डेटा पार्स करने में त्रुटि!');
+        }
+      } else {
+        showNotification('लोकल स्टोरेज में कोई डेटा नहीं मिला!');
+      }
+      
+      loadSheet();
+      updateStorageInfo();
+    }
+    
+    // Update storage info display
+    function updateStorageInfo() {
+      const savedData = localStorage.getItem("excelData");
+      if (savedData) {
+        const sizeInKB = (savedData.length / 1024).toFixed(2);
+        const sheetCount = Object.keys(sheets).length;
+        let rowCount = 0;
+        
+        Object.values(sheets).forEach(sheet => {
+          rowCount += sheet.data.length;
+        });
+        
+        storageInfo.innerHTML = `
+          <strong>${sheetCount}</strong> शीट्स | 
+          <strong>${rowCount}</strong> पंक्तियाँ | 
+          <strong>${sizeInKB} KB</strong>
+        `;
+      } else {
+        storageInfo.textContent = 'लोकल स्टोरेज में कोई डेटा नहीं है';
+      }
+    }
+
+    // Create the data preview table
+    function createDataTable(data) {
+      if (!data || data.length === 0) {
+        dataTableHead.innerHTML = '<tr><th colspan="10">कोई डेटा उपलब्ध नहीं</th></tr>';
+        dataTableBody.innerHTML = '';
+        return;
+      }
+
+      const headerRow = document.createElement("tr");
+      headerRow.appendChild(document.createElement("th")); // Empty corner cell
+      
+      // Create headers
+      data[0].forEach((_, idx) => {
+        const th = document.createElement("th");
+        th.textContent = String.fromCharCode(65 + idx);
+        headerRow.appendChild(th);
+      });
+      
+      dataTableHead.innerHTML = "";
+      dataTableHead.appendChild(headerRow);
+      dataTableBody.innerHTML = "";
+
+      // Create rows
+      for (let i = 0; i < data.length; i++) {
+        const tr = document.createElement("tr");
+        const thTr = document.createElement("th");
+        thTr.textContent = (i + 1).toString();
+        thTr.className = "row-header";
+        tr.appendChild(thTr);
+
+        for (let k = 0; k < data[i].length; k++) {
+          const td = document.createElement("td");
+          td.textContent = data[i][k];
+          td.addEventListener("click", () => selectCell(i, k));
+          tr.appendChild(td);
+        }
+
+        dataTableBody.appendChild(tr);
+      }
+
+      config.totalRows = data.length;
+      config.totalCols = data[0].length;
+      updateCellCount();
+    }
+
+    // Select a cell
+    function selectCell(row, col) {
+      if (row >= config.totalRows || row < 0 || col >= config.totalCols || col < 0) return;
+      config.selectedRow = row;
+      config.selectedCol = col;
+
+      clearSelection();
+
+      const td = dataTableBody.rows[config.selectedRow]?.cells[config.selectedCol + 1];
+      if (td) {
+        td.classList.add("selected");
+        td.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      updateStatusBar();
+    }
+
+    // Clear selection from all cells
+    function clearSelection() {
+      const cells = dataTableBody.querySelectorAll("td");
+      cells.forEach(cell => cell.classList.remove("selected"));
+    }
+
+    // Update status bar information
+    function updateStatusBar() {
+      const colName = String.fromCharCode(65 + config.selectedCol);
+      cellAddress.textContent = `${colName}${config.selectedRow + 1}`;
+
+      const cell = dataTableBody.rows[config.selectedRow]?.cells[config.selectedCol + 1];
+      cellValue.textContent = cell?.textContent || "-";
+    }
+
+    // Populate field options for pivot table
+    function populateFieldOptions() {
+      const cols = config.totalCols;
+      rowField.innerHTML = '<option value="">पंक्ति कॉलम चुनें</option>';
+      colField.innerHTML = '<option value="">स्तंभ कॉलम चुनें</option>';
+      valueField.innerHTML = '<option value="">मान कॉलम चुनें</option>';
+
+      for (let i = 0; i < cols; i++) {
+        const colName = String.fromCharCode(65 + i);
+        const option = `<option value="${i}">${colName} (${getHeader(i)})</option>`;
+        rowField.insertAdjacentHTML('beforeend', option);
+        colField.insertAdjacentHTML('beforeend', option);
+        valueField.insertAdjacentHTML('beforeend', option);
+      }
+    }
+    
+    // Get header text for a column
+    function getHeader(colIdx) {
+      const sheetData = sheets[config.currentSheet].data;
+      if (sheetData.length > 0 && sheetData[0][colIdx]) {
+        return sheetData[0][colIdx];
+      }
+      return String.fromCharCode(65 + colIdx);
+    }
+
+    // Generate Pivot Table
+    function generatePivotTable() {
+      const rowIdx = parseInt(rowField.value);
+      const colIdx = parseInt(colField.value);
+      const valueIdx = parseInt(valueField.value);
+      const aggType = aggregation.value;
+
+      if (isNaN(rowIdx) || isNaN(colIdx) || isNaN(valueIdx)) {
+        showNotification('कृपया पंक्ति, स्तंभ, और मान कॉलम चुनें!');
+        return;
+      }
+
+      const sheetData = sheets[config.currentSheet].data || [];
+      if (!sheetData.length) {
+        showNotification('पिवट टेबल के लिए कोई डेटा उपलब्ध नहीं!');
+        return;
+      }
+      
+      // Show progress
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '30%';
+      
+      setTimeout(() => {
+        // Collect unique row and column values
+        const rowValues = new Set();
+        const colValues = new Set();
+        
+        // Start from 1 to skip header
+        for (let i = 1; i < sheetData.length; i++) {
+          rowValues.add(sheetData[i][rowIdx] || '');
+          colValues.add(sheetData[i][colIdx] || '');
+        }
+
+        const rowArray = Array.from(rowValues).sort();
+        const colArray = Array.from(colValues).sort();
+        
+        progressBar.style.width = '60%';
+
+        // Initialize pivot table data
+        const pivotData = {};
+        rowArray.forEach(row => {
+          pivotData[row] = {};
+          colArray.forEach(col => {
+            pivotData[row][col] = [];
+          });
+        });
+
+        // Populate pivot table data (skip header row)
+        for (let i = 1; i < sheetData.length; i++) {
+          const rowVal = sheetData[i][rowIdx] || '';
+          const colVal = sheetData[i][colIdx] || '';
+          const value = parseFloat(sheetData[i][valueIdx]) || 0;
+          if (pivotData[rowVal] && pivotData[rowVal][colVal]) {
+            pivotData[rowVal][colVal].push(value);
+          }
+        }
+
+        // Aggregate values
+        const aggregatedData = {};
+        let grandTotal = 0;
+        const colTotals = {};
+        
+        rowArray.forEach(row => {
+          aggregatedData[row] = {};
+          let rowTotal = 0;
+          colArray.forEach(col => {
+            const values = pivotData[row][col];
+            let result;
+            if (aggType === 'sum') {
+              result = values.reduce((sum, val) => sum + val, 0);
+            } else if (aggType === 'average') {
+              result = values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+            } else if (aggType === 'count') {
+              result = values.length;
+            } else if (aggType === 'max') {
+              result = values.length ? Math.max(...values) : 0;
+            } else if (aggType === 'min') {
+              result = values.length ? Math.min(...values) : 0;
+            }
+            
+            aggregatedData[row][col] = result;
+            rowTotal += result;
+            
+            // Calculate column totals
+            colTotals[col] = (colTotals[col] || 0) + result;
+          });
+          
+          aggregatedData[row]['Total'] = rowTotal;
+          grandTotal += rowTotal;
+        });
+
+        // Add column totals
+        aggregatedData['Total'] = {};
+        colArray.forEach(col => {
+          aggregatedData['Total'][col] = colTotals[col] || 0;
+        });
+        aggregatedData['Total']['Total'] = grandTotal;
+        
+        config.pivotData = {
+          rows: [...rowArray, 'Total'],
+          cols: [...colArray, 'Total'],
+          data: aggregatedData,
+          rowIdx,
+          colIdx,
+          valueIdx,
+          aggType
+        };
+        
+        progressBar.style.width = '90%';
+        
+        // Render pivot table
+        renderPivotTable();
+        
+        // Hide progress
+        setTimeout(() => {
+          progressBar.style.width = '100%';
+          setTimeout(() => {
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+          }, 300);
+        }, 200);
+      }, 500);
+    }
+    
+    // Render pivot table
+    function renderPivotTable() {
+      if (!config.pivotData) return;
+      
+      const { rows, cols, data } = config.pivotData;
+      
+      pivotTableHead.innerHTML = '';
+      pivotTableBody.innerHTML = '';
+
+      // Create header row
+      const headerRow = document.createElement('tr');
+      const emptyHeader = document.createElement('th');
+      emptyHeader.textContent = getHeader(config.pivotData.rowIdx);
+      headerRow.appendChild(emptyHeader);
+      
+      cols.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col;
+        th.className = 'pivot-col-header';
+        th.onclick = () => sortPivotTable(col, 'col');
+        headerRow.appendChild(th);
+      });
+      
+      // Add total header
+      const totalHeader = document.createElement('th');
+      totalHeader.textContent = 'कुल';
+      totalHeader.className = 'pivot-total-col';
+      headerRow.appendChild(totalHeader);
+      
+      pivotTableHead.appendChild(headerRow);
+
+      // Create data rows
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        const th = document.createElement('th');
+        th.textContent = row;
+        th.className = row === 'Total' ? 'pivot-total-row' : 'pivot-row-header';
+        th.onclick = () => sortPivotTable(row, 'row');
+        tr.appendChild(th);
+        
+        cols.forEach(col => {
+          const td = document.createElement('td');
+          const value = data[row][col];
+          
+          // Format numbers
+          if (typeof value === 'number') {
+            td.textContent = value.toFixed(value % 1 === 0 ? 0 : 2);
+          } else {
+            td.textContent = value || '0';
+          }
+          
+          if (row === 'Total' && col === 'Total') {
+            td.className = 'pivot-grand-total';
+          } else if (row === 'Total') {
+            td.className = 'pivot-total-col';
+          } else if (col === 'Total') {
+            td.className = 'pivot-total-row';
+          }
+          
+          tr.appendChild(td);
+        });
+        
+        pivotTableBody.appendChild(tr);
+      });
+
+      showNotification('पिवट टेबल सफलतापूर्वक बनाई गई!');
+    }
+    
+    // Sort pivot table
+    function sortPivotTable(key, type) {
+      if (!config.pivotData) return;
+      
+      // Toggle sort direction
+      if (config.sortConfig.column === key) {
+        config.sortConfig.direction = config.sortConfig.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        config.sortConfig.column = key;
+        config.sortConfig.direction = 'asc';
+      }
+      
+      // Sort rows
+      if (type === 'row' && key !== 'Total') {
+        config.pivotData.rows = config.pivotData.rows
+          .filter(row => row !== 'Total')
+          .sort((a, b) => {
+            const valA = config.pivotData.data[a][key] || 0;
+            const valB = config.pivotData.data[b][key] || 0;
+            return config.sortConfig.direction === 'asc' ? valA - valB : valB - valA;
+          });
+        config.pivotData.rows.push('Total');
+      }
+      
+      // Sort columns
+      if (type === 'col' && key !== 'Total') {
+        config.pivotData.cols = config.pivotData.cols
+          .filter(col => col !== 'Total')
+          .sort((a, b) => {
+            let valA = 0, valB = 0;
+            
+            // Calculate average for column
+            config.pivotData.rows.forEach(row => {
+              if (row !== 'Total') {
+                valA += config.pivotData.data[row][a] || 0;
+                valB += config.pivotData.data[row][b] || 0;
+              }
+            });
+            
+            return config.sortConfig.direction === 'asc' ? valA - valB : valB - valA;
+          });
+        config.pivotData.cols.push('Total');
+      }
+      
+      renderPivotTable();
+    }
+
+    // Export Pivot Table as CSV
+    function exportPivotTable() {
+      if (!config.pivotData) {
+        showNotification('पहले पिवट टेबल बनाएं!');
+        return;
+      }
+
+      const { rows, cols, data } = config.pivotData;
+      const csvData = [['', ...cols]];
+      
+      rows.forEach(row => {
+        const rowData = [row];
+        cols.forEach(col => {
+          rowData.push(data[row][col] || '');
+        });
+        csvData.push(rowData);
+      });
+
+      const csv = Papa.unparse(csvData);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `pivot-table-${new Date().toLocaleDateString('en-GB').split('/').join('-')}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      showNotification('पिवट टेबल CSV के रूप में निर्यात की गई!');
+    }
+    
+    // Clear pivot table
+    function clearPivotTable() {
+      pivotTableHead.innerHTML = '';
+      pivotTableBody.innerHTML = '';
+      config.pivotData = null;
+      showNotification('पिवट टेबल साफ़ की गई!');
+    }
+    
+    // Refresh data
+    function refreshData() {
+      loadSheet();
+      showNotification('डेटा ताज़ा किया गया!');
+    }
+    
+    // Load sample data
+    function showSampleData() {
+      sheets['ग्राहक सूची'].data = [
+        ['ग्राहक', 'क्षेत्र', 'उत्पाद', 'मात्रा', 'मूल्य'],
+        ['अमित', 'उत्तर', 'लैपटॉप', 5, 50000],
+        ['राजेश', 'दक्षिण', 'मोबाइल', 8, 32000],
+        ['प्रिया', 'पूर्व', 'टैबलेट', 3, 15000],
+        ['विकास', 'पश्चिम', 'लैपटॉप', 7, 70000],
+        ['सोनिया', 'उत्तर', 'मोबाइल', 6, 24000],
+        ['राहुल', 'दक्षिण', 'टैबलेट', 4, 20000],
+        ['नीता', 'पूर्व', 'लैपटॉप', 2, 20000],
+        ['संजय', 'पश्चिम', 'मोबाइल', 9, 36000],
+        ['अनिल', 'उत्तर', 'टैबलेट', 5, 25000],
+        ['मीरा', 'दक्षिण', 'लैपटॉप', 4, 40000]
+      ];
+      config.currentSheet = 'ग्राहक सूची';
+      saveToLocalStorage();
+      showNotification('नमूना डेटा लोड किया गया और सहेजा गया!');
+    }
+
+    // Load sheet data
+    function loadSheet() {
+      const sheetData = sheets[config.currentSheet].data || [];
+      createDataTable(sheetData);
+      populateFieldOptions();
+      selectCell(0, 0);
+      sheetCount.textContent = Object.keys(sheets).length;
+      clearPivotTable();
+      updateStorageInfo();
+    }
+
+    // Add new sheet
+    function addSheet() {
+      const sheetName = `शीट${Object.keys(sheets).length + 1}`;
+      sheets[sheetName] = { data: [], formulas: {}, dataTypes: {}, formatting: {} };
+      const tab = document.createElement('div');
+      tab.className = 'sheet-tab';
+      tab.dataset.sheet = sheetName;
+      tab.textContent = sheetName;
+      tab.addEventListener('click', () => {
+        document.querySelector('.sheet-tab.active').classList.remove('active');
+        tab.classList.add('active');
+        config.currentSheet = sheetName;
+        loadSheet();
+      });
+      document.querySelector('.sheet-tabs').insertBefore(tab, document.querySelector('.add-sheet'));
+      config.currentSheet = sheetName;
+      tab.classList.add('active');
+      document.querySelector('.sheet-tab.active').classList.remove('active');
+      saveToLocalStorage();
+      showNotification(`नई शीट '${sheetName}' जोड़ी गई और सहेजी गई!`);
+    }
+
+    // Update cell count
+    function updateCellCount() {
+      if (cellCount) {
+        cellCount.textContent = (config.totalRows * config.totalCols).toString();
+      }
+    }
+
+    // Show notification
+    function showNotification(message) {
+      if (!notification || !notificationText) return;
+
+      notificationText.textContent = message;
+      notification.classList.add('show');
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    // Initialize the app when DOM is ready
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>

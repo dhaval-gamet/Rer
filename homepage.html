@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 होम - Excel Smart Data Entry Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #0d47a1;
+      --secondary: #4caf50;
+      --danger: #f44336;
+      --warning: #ff9800;
+      --light: #f5f5f5;
+      --dark: #333;
+      --success: #4caf50;
+      --border: #ddd;
+      --header-bg: #f8f9fa;
+      --cell-hover: #f0f7ff;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #e0f7fa, #f5f5f5);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 25px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .logo i {
+      font-size: 2.2rem;
+      color: #ffeb3b;
+    }
+    
+    .logo h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stat-item i {
+      font-size: 1.2rem;
+    }
+    
+    .controls {
+      padding: 20px;
+      background: var(--light);
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .input-group {
+      display: flex;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    #dataInput {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid var(--primary);
+      border-radius: 8px 0 0 8px;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+      min-width: 200px;
+    }
+    
+    #dataInput:focus {
+      outline: none;
+      border-color: var(--primary-dark);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0 24px;
+      border-radius: 0 8px 8px 0;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    
+    .btn-speech {
+      background: #ff5722;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-speech:hover {
+      background: #e64a19;
+    }
+    
+    .btn-speech:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .btn-upload {
+      background: #673ab7;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-upload:hover {
+      background: #5e35b1;
+    }
+    
+    .file-input {
+      margin-left: 10px;
+    }
+    
+    .chart-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+    
+    .chart-controls input, .chart-controls select {
+      padding: 10px;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    select {
+      padding: 10px;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    
+    .btn {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .btn-warning {
+      background: var(--warning);
+      color: white;
+    }
+    
+    .btn-info {
+      background: #2196f3;
+      color: white;
+    }
+    
+    .content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .sheet-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .sheet-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .sheet-tab {
+      padding: 10px 20px;
+      background: var(--light);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    
+    .sheet-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary-dark);
+    }
+    
+    .sheet-tab:hover:not(.active) {
+      background: #e0e0e0;
+    }
+    
+    .add-sheet {
+      background: none;
+      border: 2px dashed var(--border);
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .table-container {
+      overflow: auto;
+      max-height: 500px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      background: white;
+    }
+    
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 800px;
+      position: relative;
+    }
+    
+    th, td {
+      border: 1px solid var(--border);
+      padding: 12px 15px;
+      text-align: center;
+      min-width: 120px;
+    }
+    
+    thead th {
+      background: var(--header-bg);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    tbody td {
+      transition: background 0.2s;
+      height: 50px;
+      cursor: cell;
+    }
+    
+    tbody td:focus {
+      outline: 3px solid var(--primary);
+      background: var(--cell-hover);
+      z-index: 2;
+      position: relative;
+    }
+    
+    tbody tr:hover td {
+      background: rgba(240, 247, 255, 0.5);
+    }
+    
+    .row-header {
+      background: var(--header-bg);
+      font-weight: 600;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .selected {
+      background: #e3f2fd !important;
+    }
+    
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: var(--light);
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    
+    .cell-status {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .cell-address {
+      background: var(--primary);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 8px;
+      background: var(--success);
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transform: translateX(120%);
+      transition: transform 0.4s ease;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .formula-bar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 15px;
+      background: var(--light);
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    
+    .formula-bar label {
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+    
+    .formula-input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: monospace;
+    }
+    
+    .chart-container {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    #chartCanvas {
+      max-width: 100%;
+      height: 400px;
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .logo {
+        justify-content: center;
+      }
+      
+      .stats {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .button-group {
+        justify-content: center;
+      }
+      
+      .sheet-controls {
+        flex-direction: column;
+      }
+      
+      .sheet-tabs {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+      
+      .input-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .btn-primary, .btn-speech, .btn-upload {
+        border-radius: 8px;
+        margin-left: 0;
+        margin-top: 10px;
+      }
+      
+      .table-container {
+        max-height: 400px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .btn {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+      }
+      
+      #dataInput {
+        border-radius: 8px;
+      }
+      
+      .chart-container {
+        padding: 10px;
+        height: 300px;
+      }
+      
+      .controls, .content {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <i class="fas fa-file-excel"></i>
+        <h1>Excel Smart Data Entry Tool</h1>
+      </div>
+      <nav>
+  <a href="index.html" class="btn btn-info" data-tippy-content="होम पेज पर जाएं"><i class="fas fa-home"></i>होम</a>
+  <a href="data-entry.html" class="btn btn-info" data-tippy-content="डेटा दर्ज करें">डेटा एंट्री</a>
+  <a href="file-upload.html" class="btn btn-info" data-tippy-content="फ़ाइल अपलोड करें"></i>फ़ाइल अपलोड</a>
+  <a href="chart-view.html" class="btn btn-info" data-tippy-content="चार्ट देखें">चार्ट</a>
+  <a href="formatting.html" class="btn btn-info" data-tippy-content="सेल फॉर्मेट करें">फॉर्मेटिंग</a>
+  <a href="pivot-table.html" class="btn btn-info" data-tippy-content="सेल फॉर्मेट करें">pivot tebal</a>
+</nav>
+      <div class="stats">
+        <div class="stat-item">
+          <i class="fas fa-table"></i>
+          <span>शीट: <strong id="sheetCount">1</strong></span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-layer-group"></i>
+          <span>सेल: <strong id="cellCount">-</strong></span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-database"></i>
+          <span>स्टोरेज: <strong>लोकल</strong></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <h2>स्वागत है!</h2>
+      <p>Excel Smart Data Entry Tool एक शक्तिशाली और उपयोगकर्ता-अनुकूल उपकरण है जो आपको आसानी से डेटा प्रबंधित करने, चार्ट बनाने, और फ़ाइलें अपलोड करने की सुविधा देता है।</p>
+      <p>विशेषताएं:</p>
+      <ul>
+        <li><i class="fas fa-keyboard"></i> मैन्युअल डेटा एंट्री और वाक् पहचान</li>
+        <li><i class="fas fa-file-upload"></i> CSV/Excel और इमेज (OCR) अपलोड</li>
+        <li><i class="fas fa-chart-bar"></i> बार, लाइन, और पाई चार्ट जनरेशन</li>
+        <li><i class="fas fa-save"></i> डेटा को लोकल स्टोरेज में सहेजें</li>
+        <li><i class="fas fa-download"></i> Excel, PDF, और JSON में निर्यात</li>
+      </ul>
+      <div class="button-group">
+        <a href="data-entry.html" class="btn btn-primary" data-tippy-content="डेटा दर्ज करने के लिए शुरू करें">
+          <i class="fas fa-arrow-right"></i> डेटा एंट्री शुरू करें
+        </a>
+        <a href="file-upload.html" class="btn btn-success" data-tippy-content="फ़ाइल अपलोड करें">
+          <i class="fas fa-file-upload"></i> फ़ाइल अपलोड करें
+        </a>
+        <a href="chart-view.html" class="btn btn-info" data-tippy-content="चार्ट देखें">
+          <i class="fas fa-chart-bar"></i> चार्ट देखें
+        </a>
+      </div>
+    </div>
+
+    <div class="notification" id="notification">
+      <i class="fas fa-check-circle"></i>
+      <span id="notificationText">स्वागत है!</span>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const notification = document.getElementById("notification");
+    const notificationText = document.getElementById("notificationText");
+    const sheetCount = document.getElementById("sheetCount");
+    const cellCount = document.getElementById("cellCount");
+
+    // Initialize the application
+    function initApp() {
+      // Initialize tooltips
+      if (typeof tippy !== 'undefined') {
+        tippy('[data-tippy-content]');
+      } else {
+        console.warn('Tippy.js लोड नहीं हुआ, टूलटिप्स अक्षम।');
+      }
+
+      // Load sheet count from localStorage
+      loadSheetStats();
+
+      showNotification('एप्लिकेशन में आपका स्वागत है!');
+    }
+
+    // Load sheet stats from localStorage
+    function loadSheetStats() {
+      const savedData = localStorage.getItem("excelData");
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        sheetCount.textContent = Object.keys(data).length;
+        const currentSheet = data['ग्राहक सूची'] || Object.values(data)[0];
+        if (currentSheet && currentSheet.data) {
+          cellCount.textContent = (currentSheet.data.length * (currentSheet.data[0]?.length || 0)).toString();
+        }
+      }
+    }
+
+    // Show notification
+    function showNotification(message) {
+      if (!notification || !notificationText) return;
+
+      notificationText.textContent = message;
+      notification.classList.add('show');
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    // Log errors
+    function logError(message, error) {
+      console.error(`[ExcelTool] ${message}`, error);
+      showNotification(`त्रुटि: ${message}`);
+    }
+
+    // Initialize the app when DOM is ready
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
