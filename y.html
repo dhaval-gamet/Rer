@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>उन्नत डेटा डैशबोर्ड</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.34.0.min.js"></script>
+    <!-- SheetJS -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- PapaParse -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsPDF/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; transition: background-color 0.3s, color 0.3s; }
+        .container { max-width: 1600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .visualization-container { margin-top: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 5px; cursor: move; }
+        #visualizations .card { position: relative; }
+        .dark-mode { background-color: #222; color: #fff; }
+        .dark-mode .container { background: #333; }
+        .dark-mode .visualization-container { border-color: #555; background: #444; }
+        .highlight { background-color: #e0f7fa !important; }
+        .btn i { margin-right: 5px; }
+        #colorPicker { width: 100%; height: 38px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2><i class="bi bi-upload"></i> डेटा अपलोड करें</h2>
+        <div class="row gy-3">
+            <div class="col-md-3">
+                <label><i class="bi bi-file-earmark"></i> फ़ाइल (CSV/Excel):</label>
+                <input type="file" id="fileInput" class="form-control" accept=".csv, .xlsx, .xls">
+            </div>
+            <div class="col-md-3">
+                <label><i class="bi bi-bar-chart"></i> चार्ट प्रकार:</label>
+                <select id="chartType" class="form-select">
+                    <option value="bar">बार चार्ट</option>
+                    <option value="line">लाइन चार्ट</option>
+                    <option value="scatter">स्कैटर चार्ट</option>
+                    <option value="pie">पाई चार्ट</option>
+                    <option value="heatmap">हीटमैप</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label><i class="bi bi-palette"></i> चार्ट रंग:</label>
+                <input type="color" id="colorPicker" class="form-control" value="#1f77b4">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button id="addVisualization" class="btn btn-primary w-100"><i class="bi bi-plus-circle"></i> विज़ुअलाइज़ेशन जोड़ें</button>
+            </div>
+            <div class="col-md-3">
+                <label><i class="bi bi-type-h1"></i> चार्ट शीर्षक:</label>
+                <input type="text" id="chartTitle" class="form-control" placeholder="शीर्षक दर्ज करें">
+            </div>
+            <div class="col-md-3">
+                <label><i class="bi bi-x-axis"></i> X-अक्ष लेबल:</label>
+                <input type="text" id="xAxisLabel" class="form-control" placeholder="X-अक्ष लेबल">
+            </div>
+            <div class="col-md-3">
+                <label><i class="bi bi-y-axis"></i> Y-अक्ष लेबल:</label>
+                <input type="text" id="yAxisLabel" class="form-control" placeholder="Y-अक्ष लेबल">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button id="toggleTheme" class="btn btn-secondary w-100"><i class="bi bi-moon"></i> थीम बदलें</button>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button id="downloadTemplate" class="btn btn-info w-100"><i class="bi bi-download"></i> टेम्पलेट डाउनलोड करें</button>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button id="addDataBtn" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addDataModal"><i class="bi bi-plus-square"></i> नया डेटा जोड़ें</button>
+            </div>
+        </div>
+        <!-- Modal for Adding Data -->
+        <div class="modal fade" id="addDataModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-plus-square"></i> नया डेटा जोड़ें</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="addDataForm"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="saveData"><i class="bi bi-save"></i> सहेजें</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <h3><i class="bi bi-table"></i> पूर्वावलोकन एवं खोज</h3>
+        <div class="mb-3 d-flex">
+            <input type="text" id="searchInput" class="form-control me-2" placeholder="सर्च करें...">
+            <button id="searchBtn" class="btn btn-outline-secondary"><i class="bi bi-search"></i> खोज</button>
+            <button id="exportCsv" class="btn btn-success ms-2"><i class="bi bi-filetype-csv"></i> CSV एक्सपोर्ट</button>
+            <button id="exportExcel" class="btn btn-success ms-2"><i class="bi bi-filetype-xlsx"></i> Excel एक्सपोर्ट</button>
+            <button id="exportPdf" class="btn btn-danger ms-2"><i class="bi bi-filetype-pdf"></i> PDF एक्सपोर्ट</button>
+        </div>
+        <div class="row gy-3 mb-3">
+            <div class="col-md-3">
+                <label><i class="bi bi-columns"></i> प्रदर्शित कॉलम:</label>
+                <select id="dataColsSelect" multiple class="form-select" style="height:100px;"></select>
+            </div>
+        </div>
+        <div id="dataTable" class="table-responsive" style="max-height:300px; overflow:auto;"></div>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+            <button id="prevPage" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> पिछला</button>
+            <span id="dataPageInfo"></span>
+            <button id="nextPage" class="btn btn-outline-primary"><i class="bi bi-arrow-right"></i> अगला</button>
+        </div>
+        <hr>
+        <h3><i class="bi bi-filter"></i> फ़िल्टर एवं सॉर्ट</h3>
+        <div class="row gy-3">
+            <div class="col-md-3">
+                <label><i class="bi bi-funnel"></i> कॉलम फ़िल्टर:</label>
+                <select id="filterCol" class="form-select"></select>
+                <input type="text" id="filterValue" class="form-control mt-2" placeholder="मान दर्ज करें">
+            </div>
+            <div class="col-md-3">
+                <label><i class="bi bi-calendar"></i> तारीख रेंज:</label>
+                <input type="date" id="startDate" class="form-control mb-2">
+                <input type="date" id="endDate" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label><i class="bi bi-list-ul"></i> ग्रुप बाय:</label>
+                <select id="groupByCols" multiple class="form-select" style="height:100px;"></select>
+            </div>
+            <div class="col-md-3">
+                <label><i class="bi bi-sort-down"></i> सॉर्ट कॉलम:</label>
+                <select id="sortCol" class="form-select"><option value="">कोई नहीं</option></select>
+                <div class="form-check form-check-inline mt-2">
+                    <input type="radio" name="sortOrder" id="asc" value="asc" class="form-check-input" checked>
+                    <label class="form-check-label" for="asc">असेंडिंग</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input type="radio" name="sortOrder" id="desc" value="desc" class="form-check-input">
+                    <label class="form-check-label" for="desc">डिसेंडिंग</label>
+                </div>
+            </div>
+        </div>
+        <button id="applyFilterSort" class="btn btn-secondary mt-3"><i class="bi bi-check-circle"></i> लागू करें</button>
+        <hr>
+        <h3><i class="bi bi-calculator"></i> डेटा सांख्यिकी</h3>
+        <select id="statsCol" class="form-select mb-2" style="width:200px;">
+            <option value="">कॉलम चुनें</option>
+        </select>
+        <div id="statsOutput"></div>
+        <hr>
+        <h3><i class="bi bi-bar-chart-line"></i> विज़ुअलाइज़ेशन</h3>
+        <div id="visualizations" class="row"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let rawData = [], filteredData = [], headers = [], visualizations = [];
+            const rowsPerPage = 10;
+            let currentPage = 1;
+
+            // Helper function to safely attach event listeners
+            function attachEventListener(id, event, handler) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener(event, handler);
+                } else {
+                    console.warn(`Element with ID '${id}' not found.`);
+                }
+            }
+
+            // Event Listeners
+            attachEventListener('fileInput', 'change', handleFile);
+            attachEventListener('searchBtn', 'click', searchTable);
+            attachEventListener('prevPage', 'click', () => changePage(-1));
+            attachEventListener('nextPage', 'click', () => changePage(1));
+            attachEventListener('exportCsv', 'click', exportCsv);
+            attachEventListener('exportExcel', 'click', exportExcel);
+            attachEventListener('exportPdf', 'click', exportPdf);
+            attachEventListener('applyFilterSort', 'click', applyFiltersAndSort);
+            attachEventListener('toggleTheme', 'click', toggleTheme);
+            attachEventListener('downloadTemplate', 'click', downloadTemplate);
+            attachEventListener('saveData', 'click', saveNewData);
+            attachEventListener('statsCol', 'change', displayStats);
+            attachEventListener('addVisualization', 'click', addVisualization);
+
+            function validateData(data) {
+                return data.every(row => headers.every(h => {
+                    if (typeof row[h] === 'undefined' || row[h] === '') {
+                        alert(`कॉलम ${h} में मान खाली है।`);
+                        return false;
+                    }
+                    return true;
+                }));
+            }
+
+            function handleFile(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = evt => {
+                    let data;
+                    if (file.name.endsWith('.csv')) {
+                        data = Papa.parse(evt.target.result, { header: true }).data;
+                    } else {
+                        const wb = XLSX.read(evt.target.result, { type: 'binary' });
+                        data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                    }
+                    if (validateData(data)) initData(data);
+                };
+                reader.readAsBinaryString(file);
+            }
+
+            function initData(data) {
+                rawData = data;
+                filteredData = [...rawData];
+                headers = Object.keys(rawData[0] || {});
+                populateControls();
+                populateAddDataForm();
+                displayTable(paginate(filteredData));
+            }
+
+            function populateControls() {
+                ['filterCol', 'sortCol', 'statsCol'].forEach(id => {
+                    const sel = document.getElementById(id);
+                    if (sel) {
+                        sel.innerHTML = id === 'sortCol' ? '<option value="">कोई नहीं</option>' : '<option value="">कोई</option>';
+                        headers.forEach(h => sel.innerHTML += `<option value="${h}">${h}</option>`);
+                    }
+                });
+                const grp = document.getElementById('groupByCols');
+                if (grp) {
+                    grp.innerHTML = '';
+                    headers.forEach(h => grp.innerHTML += `<option value="${h}">${h}</option>`);
+                }
+                const dispCols = document.getElementById('dataColsSelect');
+                if (dispCols) {
+                    dispCols.innerHTML = '';
+                    headers.forEach(h => dispCols.innerHTML += `<option value="${h}">${h}</option>`);
+                }
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.value = '';
+                currentPage = 1;
+            }
+
+            function populateAddDataForm() {
+                const form = document.getElementById('addDataForm');
+                if (form) {
+                    form.innerHTML = headers.map(h => `<label>${h}</label><input type="text" class="form-control mb-2" data-col="${h}">`).join('');
+                }
+            }
+
+            function displayTable(data) {
+                const selectedCols = Array.from(document.getElementById('dataColsSelect')?.selectedOptions || []).map(o => o.value);
+                const cont = document.getElementById('dataTable');
+                if (!cont) return;
+                let html = '<table class="table table-bordered"><thead><tr>' + selectedCols.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+                data.forEach((r, i) => {
+                    const globalIndex = (currentPage - 1) * rowsPerPage + i;
+                    html += `<tr data-index="${globalIndex}" style="cursor:pointer;">` + selectedCols.map(h => `<td>${r[h] || ''}</td>`).join('') + '</tr>';
+                });
+                html += '</tbody></table>';
+                cont.innerHTML = html;
+                const pageInfo = document.getElementById('dataPageInfo');
+                if (pageInfo) pageInfo.innerText = `पृष्ठ ${currentPage} / ${Math.ceil(filteredData.length / rowsPerPage)}`;
+                cont.querySelectorAll('tr[data-index]').forEach(row => {
+                    row.addEventListener('click', () => {
+                        const index = parseInt(row.getAttribute('data-index'));
+                        visualizations.forEach(v => {
+                            Plotly.restyle(`chart-${v.id}`, { 'marker.opacity': filteredData.map((_, i) => i === index ? 1 : 0.2) });
+                        });
+                        cont.querySelectorAll('tr').forEach(r => r.classList.remove('highlight'));
+                        row.classList.add('highlight');
+                    });
+                });
+            }
+
+            function searchTable() {
+                const searchInput = document.getElementById('searchInput');
+                if (!searchInput) return;
+                const q = searchInput.value.toLowerCase();
+                const data = rawData.filter(r => headers.some(h => String(r[h]).toLowerCase().includes(q)));
+                filteredData = data;
+                currentPage = 1;
+                displayTable(paginate(filteredData));
+            }
+
+            function changePage(delta) {
+                const pages = Math.ceil(filteredData.length / rowsPerPage);
+                currentPage = Math.min(Math.max(1, currentPage + delta), pages);
+                displayTable(paginate(filteredData));
+            }
+
+            function paginate(data) {
+                return data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+            }
+
+            function applyFiltersAndSort() {
+                let data = [...rawData];
+                const filterCol = document.getElementById('filterCol');
+                const filterValue = document.getElementById('filterValue');
+                if (filterCol && filterValue && filterCol.value && filterValue.value) {
+                    data = data.filter(r => r[filterCol.value] == filterValue.value);
+                }
+                const startDate = document.getElementById('startDate');
+                const endDate = document.getElementById('endDate');
+                if (startDate && startDate.value) data = data.filter(r => new Date(r[headers[0]]) >= new Date(startDate.value));
+                if (endDate && endDate.value) data = data.filter(r => new Date(r[headers[0]]) <= new Date(endDate.value));
+                const groupByCols = document.getElementById('groupByCols');
+                if (groupByCols) {
+                    const grp = Array.from(groupByCols.selectedOptions).map(o => o.value);
+                    if (grp.length) {
+                        const g = {};
+                        data.forEach(r => {
+                            const key = grp.map(c => r[c]).join('-');
+                            g[key] = (g[key] || 0) + 1;
+                        });
+                        data = Object.entries(g).map(([k, v]) => {
+                            const obj = {};
+                            k.split('-').forEach((val, i) => obj[grp[i]] = val);
+                            obj.count = v;
+                            return obj;
+                        });
+                        headers = [...grp, 'count'];
+                    }
+                }
+                const sortCol = document.getElementById('sortCol');
+                const sortOrder = document.querySelector('input[name="sortOrder"]:checked');
+                if (sortCol && sortCol.value && sortOrder) {
+                    data.sort((a, b) => sortOrder.value === 'asc' ? (a[sortCol.value] > b[sortCol.value] ? 1 : -1) : (a[sortCol.value] < b[sortCol.value] ? 1 : -1));
+                }
+                filteredData = data;
+                currentPage = 1;
+                displayTable(paginate(filteredData));
+                plotAll();
+                populateControls();
+                populateAddDataForm();
+            }
+
+            function exportCsv() {
+                const csv = Papa.unparse(filteredData);
+                const a = document.createElement('a');
+                a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+                a.download = 'data.csv';
+                a.click();
+            }
+
+            function exportExcel() {
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(filteredData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+                XLSX.writeFile(wb, 'data.xlsx');
+            }
+
+            function exportPdf() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.autoTable({ head: [headers], body: filteredData.map(r => headers.map(h => r[h])) });
+                doc.save('data.pdf');
+            }
+
+            function toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+            }
+
+            function downloadTemplate() {
+                const templateData = [{ Column1: 'Value1', Column2: 'Value2', Column3: 'Value3' }];
+                const csv = Papa.unparse(templateData);
+                const a = document.createElement('a');
+                a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+                a.download = 'template.csv';
+                a.click();
+            }
+
+            function saveNewData() {
+                const newRow = {};
+                headers.forEach(h => {
+                    const input = document.querySelector(`#addDataForm input[data-col="${h}"]`);
+                    newRow[h] = input ? input.value : '';
+                });
+                if (validateData([newRow])) {
+                    rawData.push(newRow);
+                    filteredData.push(newRow);
+                    displayTable(paginate(filteredData));
+                    plotAll();
+                    $('#addDataModal').modal('hide');
+                }
+            }
+
+            function displayStats() {
+                const statsCol = document.getElementById('statsCol');
+                if (!statsCol) return;
+                const col = statsCol.value;
+                if (col) {
+                    const values = filteredData.map(r => Number(r[col])).filter(v => !isNaN(v));
+                    const stats = {
+                        औसत: values.reduce((a, b) => a + b, 0) / values.length,
+                        न्यूनतम: Math.min(...values),
+                        अधिकतम: Math.max(...values),
+                        योग: values.reduce((a, b) => a + b, 0)
+                    };
+                    const statsOutput = document.getElementById('statsOutput');
+                    if (statsOutput) {
+                        statsOutput.innerHTML = Object.entries(stats).map(([k, v]) => `<p>${k}: ${v.toFixed(2)}</p>`).join('');
+                    }
+                }
+            }
+
+            function plotAll() {
+                visualizations.forEach(v => plot(v.id, v.type));
+            }
+
+            function plot(vizId, type) {
+                const data = filteredData;
+                const x = data.map(r => r[headers[0]]);
+                const y = data.map(r => Object.values(r)[1]);
+                const title = document.getElementById('chartTitle')?.value || 'Chart';
+                const xLabel = document.getElementById('xAxisLabel')?.value || headers[0];
+                const yLabel = document.getElementById('yAxisLabel')?.value || 'Value';
+                const color = document.getElementById('colorPicker')?.value || '#1f77b4';
+                let trace = {
+                    x, y, type,
+                    marker: { color },
+                    line: { color },
+                    customdata: data,
+                    hovertemplate: headers.map(h => `${h}: %{customdata[${headers.indexOf(h)}]}`).join('<br>') + '<extra></extra>'
+                };
+                if (type === 'heatmap') {
+                    trace = {
+                        z: [data.map(r => Number(r[headers[1]]) || 0)],
+                        x,
+                        y: [headers[1]],
+                        type: 'heatmap',
+                        colorscale: 'Viridis'
+                    };
+                }
+                Plotly.newPlot(`chart-${vizId}`, [trace], {
+                    title,
+                    xaxis: { title: xLabel },
+                    yaxis: { title: yLabel },
+                    margin: { t: 40 }
+                });
+            }
+
+            function addVisualization() {
+                const chartType = document.getElementById('chartType');
+                if (!chartType) return;
+                const id = `viz-${visualizations.length + 1}`;
+                const type = chartType.value;
+                visualizations.push({ id, type });
+                const col = document.createElement('div');
+                col.className = 'col-md-6 visualization-container';
+                col.id = id;
+                col.innerHTML = `<div class='card'><div class='card-body'><h5 class='card-title'><i class="bi bi-bar-chart-line"></i> Visualization ${visualizations.length}</h5><div id='chart-${id}' style='height:400px;'></div><button class='btn btn-sm btn-danger remove-viz mt-2' data-id='${id}'><i class="bi bi-trash"></i> Remove</button> <button class='btn btn-sm btn-secondary fullscreen-viz mt-2' data-id='${id}'><i class="bi bi-arrows-fullscreen"></i> पूर्ण स्क्रीन</button> <button class='btn btn-sm btn-success download-viz mt-2' data-id='${id}'><i class="bi bi-download"></i> चार्ट डाउनलोड</button></div></div>`;
+                const visualizationsContainer = document.getElementById('visualizations');
+                if (visualizationsContainer) {
+                    visualizationsContainer.appendChild(col);
+                }
+                plot(id, type);
+                $("#visualizations").sortable({ items: ".visualization-container", placeholder: "ui-state-highlight" });
+                const removeBtn = document.querySelector(`[data-id='${id}'].remove-viz`);
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', () => {
+                        document.getElementById(id)?.remove();
+                        visualizations = visualizations.filter(v => v.id !== id);
+                    });
+                }
+                const fullscreenBtn = document.querySelector(`[data-id='${id}'].fullscreen-viz`);
+                if (fullscreenBtn) {
+                    fullscreenBtn.addEventListener('click', () => {
+                        const el = document.getElementById(`chart-${id}`);
+                        if (el && el.requestFullscreen) el.requestFullscreen();
+                    });
+                }
+                const downloadBtn = document.querySelector(`[data-id='${id}'].download-viz`);
+                if (downloadBtn) {
+                    downloadBtn.addEventListener('click', () => {
+                        Plotly.downloadImage(`chart-${id}`, { format: 'png', filename: `chart-${id}` });
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
