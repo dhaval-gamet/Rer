@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>एक्सेल ऑटोमेशन विशेषज्ञ | डेटा समाधान</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Nirmala UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a3a6d;
+            --secondary: #2c5282;
+            --accent: #0ea5e9;
+            --light: #f0f9ff;
+            --dark: #0c1e35;
+            --success: #10b981;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c1e35, #1a3a6d);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Header Styles */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeInDown 0.8s ease;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 10px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            display: block;
+        }
+        
+        nav ul li a:hover, 
+        nav ul li a.active {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(26, 58, 109, 0.3);
+        }
+        
+        /* Hero Section */
+        .hero {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+        
+        .profile-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            flex: 1;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .profile-header {
+            margin-bottom: 25px;
+        }
+        
+        .profile-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--accent);
+            margin: 0 auto 20px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 60px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .profile-card h1 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+        
+        .profile-card h2 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .profile-card p {
+            color: #555;
+            margin-bottom: 25px;
+            flex-grow: 1;
+            line-height: 1.8;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-item .number {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-item .label {
+            font-size: 14px;
+            color: var(--secondary);
+        }
+        
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .contact-info a {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .contact-info a:hover {
+            transform: translateY(-5px) scale(1.1);
+            background: var(--accent);
+        }
+        
+        /* Services Section */
+        .services-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .section-header h2 {
+            font-size: 36px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-header h2:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        .section-header p {
+            color: #555;
+            max-width: 700px;
+            margin: 20px auto 0;
+            font-size: 18px;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            border-top: 4px solid var(--accent);
+            text-align: center;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary);
+        }
+        
+        .service-icon {
+            font-size: 50px;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+        
+        .service-card h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .service-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+        
+        .highlight {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid var(--success);
+            text-align: left;
+        }
+        
+        .highlight p {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #444;
+        }
+        
+        /* Chart Demo Section */
+        .chart-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+        
+        .chart-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .chart-box {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .chart-title {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 15px;
+            padding: 60px 40px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            animation: fadeIn 0.8s ease 0.8s both;
+        }
+        
+        .cta-section h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        
+        .cta-section p {
+            max-width: 700px;
+            margin: 0 auto 30px;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: white;
+            color: var(--primary);
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        /* Footer */
+        footer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-top: 20px;
+            animation: fadeIn 0.8s ease 1s both;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+        
+        .copyright {
+            color: #666;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .hero {
+                flex-direction: column;
+            }
+            
+            .chart-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container .chart-box {
+                min-width: 100%;
+            }
+            
+            .footer-links {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-file-excel"></i>
+                </div>
+                <div class="logo-text">एक्सेल ऑटोमेशन प्रो</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">होम</a></li>
+                    <li><a href="#">सेवाएँ</a></li>
+                    <li><a href="#">पोर्टफोलियो</a></li>
+                    <li><a href="#">ग्राहक प्रशंसापत्र</a></li>
+                    <li><a href="#">संपर्क करें</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <!-- Hero Section -->
+        <div class="hero">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-img">
+                        <imge class="g.jpg">
+                            
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h1>Gameti Dhavalkumar</h1>
+                    <h2>एक्सेल ऑटोमेशन विशेषज्ञ</h2>
+                    <p>कस्टम एक्सेल समाधानों के साथ जटिल डेटा को क्रियाशील अंतर्दृष्टि में बदलना। विश्व स्तर पर व्यवसायों के लिए स्वचालन, डेटा विज़ुअलाइज़ेशन और प्रक्रिया अनुकूलन में विशेषज्ञता।</p>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="number">8+</div>
+                        <div class="label">वर्षों का अनुभव</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">250+</div>
+                        <div class="label">परियोजनाएँ</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number">98%</div>
+                        <div class="label">संतुष्टि दर</div>
+                    </div>
+                </div>
+                
+                <div>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="dhaval gamet"><i class="fab fa-github"></i></a>
+                    <a href="gametidhaval980@gmail.com"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+            
+            <!-- Services Highlight -->
+            <div class="services-section">
+                <div class="section-header">
+                    <h2>विशेष एक्सेल समाधान</h2>
+                    <p>मैं शक्तिशाली टूल बनाता हूँ जो एक्सेल में डेटा के साथ काम करने के तरीके को बदल देते हैं</p>
+                    <a href="" class="btn"></a>
+                </div>
+                
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3>फास्ट डेटा एंट्री</h3>
+                        <p>कस्टम फॉर्म और टेम्पलेट जो डेटा इनपुट को तेज करते हैं और सटीकता सुनिश्चित करते हैं। स्वचालित सत्यापन और वर्कफ़्लो के साथ डेटा एंट्री समय को 70% तक कम करें।</p>
+                        <a href="" class="btn">Get Start</a>
+                        <div class="highlight">
+                            <p><i class="fas fa-check-circle"></i> उपयोगकर्ता के अनुकूल डेटा फॉर्म</p>
+                            <p><i class="fas fa-check-circle"></i> रियल-टाइम वैलिडेशन</p>
+                            <p><i class="fas fa-check-circle"></i> डेटाबेस एकीकरण</p>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>एक्सेल ऑटोमेशन</h3>
+                        <p>कस्टम मैक्रोज़ और VBA स्क्रिप्ट के साथ दोहराए जाने वाले कार्यों को समाप्त करें। प्रति सप्ताह घंटों बचाने के लिए रिपोर्टिंग, डेटा प्रोसेसिंग और जटिल गणनाओं को स्वचालित करें।</p>
+                        <a href="" class="btn">Get Start</a>
+                        <div class="highlight">
+                            <p><i class="fas fa-check-circle"></i> कस्टम VBA स्क्रिप्टिंग</p>
+                            <p><i class="fas fa-check-circle"></i> स्वचालित रिपोर्टिंग</p>
+                            <p><i class="fas fa-check-circle"></i> वर्कफ़्लो अनुकूलन</p>
+                        </div>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h3>चार्ट विज़ुअलाइज़ेशन</h3>
+                        <p>कच्चे डेटा को आकर्षक दृश्य कथाओं में बदलें। इंटरएक्टिव डैशबोर्ड और डायनामिक चार्ट जो आपके डेटा परिवर्तनों के साथ स्वचालित रूप से अपडेट होते हैं।</p>
+                        <a href="" class="btn">Get Start</a>
+                        <div class="highlight">
+                            <p><i class="fas fa-check-circle"></i> इंटरएक्टिव डैशबोर्ड</p>
+                            <p><i class="fas fa-check-circle"></i> रियल-टाइम अपडेट</p>
+                            <p><i class="fas fa-check-circle"></i> कस्टम चार्ट डिज़ाइन</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chart Visualization Demo -->
+        <div class="chart-section">
+            <div class="section-header">
+                <h2>डेटा विज़ुअलाइज़ेशन उदाहरण</h2>
+                <p>इंटरएक्टिव चार्ट और डैशबोर्ड जो आपके डेटा को जीवंत बनाते हैं</p>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-box">
+                    <div class="chart-title">बिक्री प्रदर्शन डैशबोर्ड</div>
+                    <canvas id="salesChart" height="300"></canvas>
+                </div>
+                
+                <div class="chart-box">
+                    <div class="chart-title">डेटा एंट्री दक्षता</div>
+                    <canvas id="efficiencyChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <h2>अपने एक्सेल अनुभव को रूपांतरित करें</h2>
+            <p>कस्टम एक्सेल ऑटोमेशन समाधानों के साथ प्रति सप्ताह घंटों बचाने के लिए तैयार हैं? आइए चर्चा करें कि मैं आपके वर्कफ़्लो को कैसे अनुकूलित कर सकता हूँ और आपके डेटा प्रबंधन को बदल सकता हूँ।</p>
+            <a href="#" class="btn">मुफ्त परामर्श प्राप्त करें</a>
+            <a href="#" class="btn btn-outline">पोर्टफोलियो देखें</a>
+        </div>
+        
+        <!-- Footer -->
+        <footer>
+            <div class="logo">
+                <div class="logo-icon" style="width: 40px; height: 40px; font-size: 20px;">
+                    <i class="fas fa-file-excel"></i>
+                </div>
+                <div class="logo-text" style="font-size: 22px;">एक्सेल ऑटोमेशन प्रो</div>
+            </div>
+            
+            <div class="footer-links">
+                <a href="#">होम</a>
+                <a href="#">सेवाएँ</a>
+                <a href="#">पोर्टफोलियो</a>
+                <a href="#">ग्राहक प्रशंसापत्र</a>
+                <a href="#">संपर्क करें</a>
+                <a href="#">गोपनीयता नीति</a>
+            </div>
+            
+            <p class="copyright">&copy; 2023 एक्सेल ऑटोमेशन प्रो. सर्वाधिकार सुरक्षित<br>2015 से डेटा को समाधानों में बदल रहे हैं</p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sales Chart
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            const salesChart = new Chart(salesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['जनवरी', 'फरवरी', 'मार्च', 'अप्रैल', 'मई', 'जून'],
+                    datasets: [{
+                        label: 'ऑटोमेशन से पहले',
+                        data: [120, 190, 150, 180, 170, 220],
+                        backgroundColor: 'rgba(14, 165, 233, 0.5)',
+                        borderColor: 'rgba(14, 165, 233, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'ऑटोमेशन के बाद',
+                        data: [180, 240, 210, 250, 230, 300],
+                        backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'बिक्री (हज़ारों में)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Efficiency Chart
+            const efficiencyCtx = document.getElementById('efficiencyChart').getContext('2d');
+            const efficiencyChart = new Chart(efficiencyCtx, {
+                type: 'line',
+                data: {
+                    labels: ['सप्ताह 1', 'सप्ताह 2', 'सप्ताह 3', 'सप्ताह 4', 'सप्ताह 5', 'सप्ताह 6'],
+                    datasets: [{
+                        label: 'डेटा एंट्री समय (घंटे)',
+                        data: [28, 25, 22, 18, 12, 8],
+                        borderColor: 'rgba(26, 58, 109, 1)',
+                        backgroundColor: 'rgba(26, 58, 109, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'खर्च किए गए घंटे'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'कार्यान्वयन के बाद के सप्ताह'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Navigation active state
+            document.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Button animations
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px) scale(1.05)';
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
