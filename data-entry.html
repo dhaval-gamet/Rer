@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="css/styles.css">
   <script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>
   <style>
-:root {
+    :root {
       --primary: #1a73e8;
       --primary-dark: #0d47a1;
       --secondary: #4caf50;
@@ -517,14 +517,14 @@
         <i class="fas fa-file-excel"></i>
         <h1>Excel Smart Data Entry Tool</h1>
       </div>
-    <nav>
-  <a href="index.html" class="btn btn-info" data-tippy-content="होम पेज पर जाएं">होम</a>
-  <a href="data-entry.html" class="btn btn-info" data-tippy-content="डेटा दर्ज करें">डेटा एंट्री</a>
-  <a href="file-upload.html" class="btn btn-info" data-tippy-content="फ़ाइल अपलोड करें">फ़ाइल अपलोड</a>
-  <a href="chart-view.html" class="btn btn-info" data-tippy-content="चार्ट देखें">चार्ट</a>
-  <a href="formatting.html" class="btn btn-info" data-tippy-content="सेल फॉर्मेट करें">फॉर्मेटिंग</a>
-  <a href="pivot-table.html" class="btn btn-info" data-tippy-content="सेल फॉर्मेट करें">pivot tebal</a>
-</nav>
+      <nav>
+        <a href="index.html" class="btn btn-info" data-tippy-content="होम पेज पर जाएं">होम</a>
+        <a href="data-entry.html" class="btn btn-info" data-tippy-content="डेटा दर्ज करें">डेटा एंट्री</a>
+        <a href="file-upload.html" class="btn btn-info" data-tippy-content="फ़ाइल अपलोड करें">फ़ाइल अपलोड</a>
+        <a href="chart-view.html" class="btn btn-info" data-tippy-content="चार्ट देखें">चार्ट</a>
+        <a href="formatting.html" class="btn btn-info" data-tippy-content="सेल फॉर्मेट करें">फॉर्मेटिंग</a>
+        <a href="pivot-table.html" class="btn btn-info" data-tippy-content="पिवट टेबल">पिवट टेबल</a>
+      </nav>
       <div class="stats">
         <div class="stat-item">
           <i class="fas fa-table"></i>
@@ -561,6 +561,10 @@
           <option value="number">संख्या</option>
           <option value="date">दिनांक (YYYY-MM-DD)</option>
           <option value="email">ईमेल</option>
+        </select>
+        <select id="navigationDirection" data-tippy-content="डेटा दर्ज करने के बाद अगली सेल चुनें">
+          <option value="horizontal">क्षैतिज (दाएं)</option>
+          <option value="vertical">लंबवत (नीचे)</option>
         </select>
       </div>
 
@@ -658,14 +662,15 @@
       lastSaved: null,
       history: [],
       historyIndex: -1,
-      currentSheet: 'ग्राहक सूची'
+      currentSheet: 'ग्राहक सूची',
+      navigationDirection: 'horizontal' // Default to horizontal
     };
 
     // Sheet management
     const sheets = {
-      'ग्राहक सूची': { data: [], formulas: {}, dataTypes: {} },
-      'आदेश': { data: [], formulas: {}, dataTypes: {} },
-      'इन्वेंटरी': { data: [], formulas: {}, dataTypes: {} }
+      'ग्राहक सूची': { data: [], formulas: {}, dataTypes: {}, navigationDirection: 'horizontal' },
+      'आदेश': { data: [], formulas: {}, dataTypes: {}, navigationDirection: 'horizontal' },
+      'इन्वेंटरी': { data: [], formulas: {}, dataTypes: {}, navigationDirection: 'horizontal' }
     };
 
     // DOM Elements
@@ -685,6 +690,7 @@
     const speechStatus = document.getElementById("speechStatus");
     const dataType = document.getElementById("dataType");
     const speechLang = document.getElementById("speechLang");
+    const navigationDirection = document.getElementById("navigationDirection");
 
     // Speech Recognition Setup
     let recognition = null;
@@ -769,6 +775,14 @@
       const cellId = `${String.fromCharCode(65 + config.selectedCol)}${config.selectedRow + 1}`;
       sheets[config.currentSheet].dataTypes[cellId] = e.target.value;
       saveToLocalStorage();
+    });
+
+    // Navigation direction change
+    navigationDirection.addEventListener('change', (e) => {
+      config.navigationDirection = e.target.value;
+      sheets[config.currentSheet].navigationDirection = e.target.value;
+      saveToLocalStorage();
+      showNotification(`नेविगेशन दिशा: ${e.target.options[e.target.selectedIndex].text}`);
     });
 
     // Real-time input validation
@@ -975,6 +989,30 @@
       }
     }
 
+    // Apply formula
+    function applyFormula() {
+      const formula = formulaInput.value.trim();
+      if (!formula) return;
+
+      const row = config.selectedRow;
+      const col = config.selectedCol;
+      const cell = tableBody.rows[row]?.cells[col + 1];
+      if (!cell) return;
+
+      const cellId = `${String.fromCharCode(65 + col)}${row + 1}`;
+
+      sheets[config.currentSheet].formulas[cellId] = formula;
+      const result = evaluateFormula(formula, cellId);
+      cell.textContent = result;
+      cell.title = `फॉर्मूला: ${formula}`;
+
+      formulaInput.value = '';
+
+      showNotification(`फॉर्मूला लागू किया गया: ${formula} (परिणाम: ${result})`);
+
+      saveToLocalStorage();
+    }
+
     // Enter data from input field
     function enterData() {
       const value = input.value.trim();
@@ -1001,40 +1039,25 @@
       saveToLocalStorage();
     }
 
-    // Apply formula to selected cell
-    function applyFormula() {
-      const formula = formulaInput.value.trim();
-      if (!formula) return;
-
-      const row = config.selectedRow;
-      const col = config.selectedCol;
-      const cell = tableBody.rows[row]?.cells[col + 1];
-      if (!cell) return;
-
-      const cellId = `${String.fromCharCode(65 + col)}${row + 1}`;
-
-      sheets[config.currentSheet].formulas[cellId] = formula;
-      const result = evaluateFormula(formula, cellId);
-      cell.textContent = result;
-      cell.title = `फॉर्मूला: ${formula}`;
-
-      formulaInput.value = '';
-
-      showNotification(`फॉर्मूला लागू किया गया: ${formula} (परिणाम: ${result})`);
-
-      saveToLocalStorage();
-    }
-
-    // Move to next cell
+    // Move to next cell based on navigation direction
     function moveToNextCell() {
-      input.value = "";
-      if (config.selectedCol < config.totalCols - 1) {
-        selectCell(config.selectedRow, config.selectedCol + 1);
-      } else if (config.selectedRow < config.totalRows - 1) {
-        selectCell(config.selectedRow + 1, 0);
+      input.value = '';
+      if (config.navigationDirection === 'horizontal') {
+        if (config.selectedCol < config.totalCols - 1) {
+          selectCell(config.selectedRow, config.selectedCol + 1);
+        } else if (config.selectedRow < config.totalRows - 1) {
+          selectCell(config.selectedRow + 1, 0);
+        } else {
+          addRow();
+          selectCell(config.selectedRow + 1, 0);
+        }
       } else {
-        addRow();
-        selectCell(config.selectedRow + 1, 0);
+        if (config.selectedRow < config.totalRows - 1) {
+          selectCell(config.selectedRow + 1, config.selectedCol);
+        } else {
+          addRow();
+          selectCell(config.selectedRow + 1, config.selectedCol);
+        }
       }
     }
 
@@ -1139,7 +1162,7 @@
     // Add new sheet
     function addSheet() {
       const sheetName = `शीट${Object.keys(sheets).length + 1}`;
-      sheets[sheetName] = { data: [], formulas: {}, dataTypes: {} };
+      sheets[sheetName] = { data: [], formulas: {}, dataTypes: {}, navigationDirection: 'horizontal' };
       const tab = document.createElement('div');
       tab.className = 'sheet-tab';
       tab.dataset.sheet = sheetName;
@@ -1153,7 +1176,7 @@
       document.querySelector('.sheet-tabs').insertBefore(tab, document.querySelector('.add-sheet'));
       config.currentSheet = sheetName;
       tab.classList.add('active');
-      document.querySelector('.sheet-tab.active').classList.remove('active');
+      document.querySelector('.sheet-tab.active')?.classList.remove('active');
       loadSheet(sheetName);
       sheetCount.textContent = Object.keys(sheets).length;
     }
@@ -1165,6 +1188,7 @@
       config.dataTypes = sheetData.dataTypes || {};
       config.totalRows = sheetData.data?.length || 10;
       config.totalCols = sheetData.data?.[0]?.length || 6;
+      config.navigationDirection = sheetData.navigationDirection || 'horizontal';
 
       createTable(config.totalRows, config.totalCols);
 
@@ -1175,6 +1199,7 @@
         }
       }
 
+      navigationDirection.value = config.navigationDirection;
       selectCell(0, 0);
       updateCellCount();
       sheetCount.textContent = Object.keys(sheets).length;
@@ -1212,7 +1237,8 @@
         totalCols: config.totalCols,
         formulas: sheets[config.currentSheet].formulas,
         dataTypes: sheets[config.currentSheet].dataTypes,
-        cellData: []
+        cellData: [],
+        navigationDirection: config.navigationDirection
       };
 
       for (let i = 0; i < config.totalRows; i++) {
@@ -1227,6 +1253,7 @@
       sheets[config.currentSheet].data = data.cellData;
       sheets[config.currentSheet].formulas = data.formulas;
       sheets[config.currentSheet].dataTypes = data.dataTypes;
+      sheets[config.currentSheet].navigationDirection = data.navigationDirection;
 
       config.history = config.history.slice(0, config.historyIndex + 1);
       config.history.push(data);
@@ -1255,6 +1282,12 @@
       Object.assign(sheets, data);
 
       loadSheet(config.currentSheet);
+
+      // Load navigation direction
+      if (data[config.currentSheet]?.navigationDirection) {
+        config.navigationDirection = data[config.currentSheet].navigationDirection;
+        navigationDirection.value = config.navigationDirection;
+      }
 
       config.lastSaved = Date.now();
       if (lastSaved) {
@@ -1290,6 +1323,7 @@
       config.totalCols = data.totalCols;
       sheets[config.currentSheet].formulas = data.formulas || {};
       sheets[config.currentSheet].dataTypes = data.dataTypes || {};
+      sheets[config.currentSheet].navigationDirection = data.navigationDirection || 'horizontal';
 
       createTable(config.totalRows, config.totalCols);
 
@@ -1299,6 +1333,7 @@
         }
       }
 
+      navigationDirection.value = config.navigationDirection;
       selectCell(Math.min(config.selectedRow, config.totalRows - 1), Math.min(config.selectedCol, config.totalCols - 1));
     }
 
@@ -1311,6 +1346,7 @@
       localStorage.removeItem("excelData");
       sheets[config.currentSheet].formulas = {};
       sheets[config.currentSheet].dataTypes = {};
+      sheets[config.currentSheet].navigationDirection = 'horizontal';
       config.history = [];
       config.historyIndex = -1;
 
@@ -1319,6 +1355,7 @@
         cell.textContent = '';
       });
 
+      navigationDirection.value = config.navigationDirection;
       saveToLocalStorage();
       showNotification("डेटा सफलतापूर्वक साफ़ किया गया!");
     }
@@ -1386,7 +1423,8 @@
         totalCols: config.totalCols,
         formulas: sheets[config.currentSheet].formulas,
         dataTypes: sheets[config.currentSheet].dataTypes,
-        cellData: []
+        cellData: [],
+        navigationDirection: config.navigationDirection
       };
 
       for (let i = 0; i < config.totalRows; i++) {
